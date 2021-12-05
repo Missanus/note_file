@@ -1,0 +1,111 @@
+volume
+::::::::
+
+artivlme chmod + pvc
+https://faun.pub/digitalocean-kubernetes-and-volume-permissions-820f46598965
+
+subPath:
+********
+ volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf
+          items:
+            - key: nginx.conf
+              path: nginx.conf
+----------------------------------------------------
+StatefulSet is the workload API object used to manage stateful applications. Manages the deployment and scaling of a set of Pods,
+ and provides guarantees about the ordering and uniqueness of these Pods. Like a Deployment,
+ a StatefulSet manages Pods that are based on an identical container spec.
+ 
+-----------------------
+Voici une liste - non exhaustive - des principaux types de stockage :
+
+hostPath : Ce type de volume monte un fichier ou un répertoire du système de fichiers du nœud hôte dans votre pod.
+emptyDir : Il s'agit d'un type de volume créé lors de la première affectation d'un pod à un nœud. Il reste actif tant que le pod s'exécute sur ce nœud. Le volume est initialement vide et les conteneurs du pod peuvent lire et écrire les fichiers dans le volume emptyDir. Une fois le pod retiré du nœud, les données du répertoire vide sont effacées.
+secret : Un volume secret est utilisé pour transmettre des informations sensibles, telles que des mots de passe, à des pods.
+ConfigMap : La ressource ConfigMap fournit un moyen d’injecter des données de configuration dans les pods.
+persistentVolumeClaim : Un volume persistentVolumeClaim est utilisé pour monter un PersistentVolume dans un pod.
+Vous pouvez également voir que j'utilise le type de volume hostPath. Le dossier précisé à la suite de l'argument 
+sera donc partagé entre mon noeud hôte et le conteneur. 
+
+---------------------------------------------------
+
+Tout d'abord expliquons ces deux notions :
+
+    Un PersistentVolume (PV) est un élément de stockage dans  le cluster qui a été provisionné par un administrateur ou provisionné  dynamiquement. 
+	Il s’agit d’une ressource dans le cluster, tout comme un nœud est une  ressource de cluster. Ils ont un cycle de  vie indépendant de tout pod.
+
+    Un PersistentVolumeClaim (PVC) est une  demande de stockage réalisée par un utilisateur ( Claim ) car comme à l'image d'un pod qui consomme 
+	des ressources de noeud, il peut également demander des niveaux spécifiques de ressources ( CPU/mémoire ).  
+	Le PVC consomme des ressources PV et peut exiger une taille particulière, des modes d'accès spécifiques ( Lecture seule, lecture/ecriture, etc ). 
+	
+--------------------------------------------
+	
+Notons qu'il est également possible de passer un argument type pour un volume hostPath. Voici les valeurs supportées par le champ :
+
+    Une chaîne de caractères vide (par défaut) sert à la rétrocompatibilité,  ce qui signifie qu’aucune vérification ne sera effectuée avant de  monter le volume hostPath.
+    DirectoryOrCreate : Si rien n’existe au chemin fourni, un dossier vide y sera créé au besoin  avec les permissions définies à 0755, avec le même groupe et la même  possession que Kubelet.
+    Directory : Un dossier doit exister au chemin fourni
+    FileOrCreate : Si rien n’existe au chemin fourni, un fichier vide y sera créé au besoin  avec les permissions définies à 0644, avec le même groupe et la même  possession que Kubelet.
+    File : Un fichier doit exister au chemin fourni
+    Socket : Un socket UNIX doit exister au chemin fourni
+    CharDevice : Un périphérique en mode caractère doit exister au chemin fourni
+    BlockDevice : Un périphérique en mode bloc doit exister au chemin fourni
+	
+	
+----------------------------------
+Créons tout d'abord un volume pour gérer nos access logs de Traefik :
+	
+	kind: PersistentVolume
+apiVersion: v1
+metadata:
+   name: access-log-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /var/log/traefik
+    type: DirectoryOrCreate
+	
+--------------------------------------------
+
+The spec for a PVC contains the following items:
+
+    accessModes which vary by the use case. These are:
+        ReadWriteOnce – mounts the volume as read-write by a single node
+        ReadOnlyMany – mounts the volume as read-only by many nodes
+        ReadWriteMany – mounts the volume as read-write by many nodes
+
+
+
+----------------------------
+
+
+
+source2    https://www.digitalocean.com/community/tutorials/how-to-deploy-a-php-application-with-kubernetes-on-ubuntu-16-04
+source: https://www.grottedubarbu.fr/kubernetes-volumes/
+
+
+---------------------------------------------
+LimitRange for PVC
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: storagelimits
+  namespace: test-lr
+spec:
+  limits:
+  - type: PersistentVolumeClaim   # choisir le type pod , container , pvc
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi

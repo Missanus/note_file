@@ -1,0 +1,4 @@
+namespace:
+*************
+
+https://kubernetes.io/docs/tasks/administer-cluster/namespaces-walkthrough/

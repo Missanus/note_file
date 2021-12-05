@@ -1,0 +1,59 @@
+Commande utilise:
+
+taille fichier linux:
+---------------------
+df -f ou df le + nom-de fichier
+
+le systèm de fichier
+---------------------
+df -T le-fichier
+
+docker save:
+------------
+docker save -o outfile.tar   image:version
+
+Commandes de monitoring docker:
+-------------------------------
+https://www.padok.fr/blog/docker-docker-compose-commandes-connaitre
+docker ps (-a)
+-a, alors vous verrez mêmes les containers stoppés.
+docker images (-a)
+La commande docker network ls liste les différents réseaux et docker-compose ps affiche tous les containers qui ont été lancés par docker-compose (qu’ils tournent actuellement ou non).
+docker network ls
+docker-compose up (-d) (--build)
+docker-compose up  stop
+(-d) 
+L’option -d, qui signifie "detach" fait tourner les conteneurs en tâche de fond. On ne voit pas les logs et on ..aura pas besoin de mais vous aurez besoin d’arrêter le conteneur pour quitter la vue....
+docker build (-t NAME ) PATH /URL 
+run crée le conteneur en utilisant l’image que vous indiquez
+docker start ID /NAME
+docker stop ID /NAME 
+docker exec -it NAME /ID contianer “sh” /”/bin/bash” 
+Cette commande vous permet de lancer un shell sur votre container. Je préfère utiliser "/bin/bash" mais votre conteneur peut ne pas avoir bash d’installé, 
+		et seulement “sh” qui est plus courant (surtout sur les alpines). 
+
+Commandes de suppression:
+-------------------------
+docker rm ID /NAME
+docker-compose rm
+docker rmi ID /NAME 
+
+Commandes de logs:
+------------------
+docker logs ID /NAME (-f --tail NBLINE ) 
+Si vous utilisez l’option -f --tail NBLINE vous pouvez suivre en live le flux de vos logs (NBLINE est le nombre de lignes que vous souhaitez afficher).
+docker-compose logs (ID /NAME )
+(-d)
+ L’astuce ici est que si vous n’utilisez pas l’option -d quand vous utilisez docker run ou docker-compose up vous verrez vos logs directement 
+ (mais vous aurez besoin d’arrêter le conteneur pour quitter la vue). 
+
+
+
+ port-forward :
+ --------------
+kubectl port-forward replicaset/mongo-75f59d57f4 28015:27017
+kubectl port-forward deployment/mongo 28015:27017
+kubectl get service mongo
+mongo   ClusterIP   10.96.41.183   <none>        27017/TCP   11s
+
+

@@ -1,0 +1,242 @@
+git gitlab
+**********
+tken: 	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
+https://www.univ-paris8.fr/IMG/pdf/demande_de_diplome_2020_2021.pdf P8
+
+
+stach et pull:
+How do I resolve git saying "Commit your changes or stash them before you can merge"?
+
+git stach and git pull origin maine 
+: permet de recuperer les modif de l'autre sur ton local 
+other:
+accepte the change :
+git commit -a -m "............................"
+git push 
+it commit -m 
+git push
+
+PS C:\Users\nassim.chetouani\Documents\Devops\20210920_formation_devops_online\Ingress\Ingress-LB-nginx> git push
+To https://github.com/Missanus/Devops.git
+ ! [rejected]        maine -> maine (non-fast-forward)
+error: failed to push some refs to 'https://github.com/Missanus/Devops.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+----------------------------------------------
+
+Remove the file from the Git repository and the filesystem:
+git repos:
+git rm file1.txt
+git commit -m "remove file1.txt"
+only from the Git repository and not remove it from the filesystem
+git rm --cached file1.txt
+git commit -m "remove file1.txt"
+Finir:
+git push origin branch_name
+
+----------------------------------------------
+
+0 ) Git Merge Conflicts | How Merge Conflicts Happen | How to resolve Merge Conflicts | Merge Conflict
+https://www.youtube.com/watch?v=nDRWhKc5Yd4
+
+je vais me rendre dans la branche master , je fais git merge maine,  puis il va me dire quu'il y a un conflit entre les deux fichier par exemle my-file.yaml , 
+je l'ouvre avec avec vi ly-file.yam, je fait les modification manulement , car lui il mva tout mentionner avec les ==== et >>>>> , uis dit add ----git commit ------------ git push
+ 
+----------------------------------------------
+0 ) git pull conflit
+quand je commit sur la meme branche , dans le mem fichier , a partir de 2 repertoire different
+git pull vi le-fichier
+git -a -mERDEgit push origin maine
+----------------------------------------------
+
+delete, file
+restore file in the stage after deleting
+git restore --stage deployment_2.yaml
+git restore deployment_2.yaml
+git status
+
+----------------------------------------------
+commit:
+IF you have NOT pushed your changes to remote
+	git reset HEAD~1     
+--->> (faut refaire le add e tle commit)
+or 
+git reset --hard eb27bf26dd18c5a34e0e82b929e0d74cfcaab316 (per exemple 'Check if the working copy is clean by git status.
+dans 'git log', je verrais quil a disparu 
+NOTE: Be careful when using git reset --hard HEAD^ as you will lose changes in the commited files (you changes will be deleted).  (faut refaire le add e tle commit)
+There are two branches to this question:
+To revert a commit but still have changes on disk do so git reset --soft HEAD~1 (le add est maintenue sauf le commit qu'a disparu )
+----------------------------------------------
+
+
+Commit:
+ELSE you have pushed your changes to remote:
+git revert HEAD
+
+recover the latest remote git to local :
+----------------------------------------
+git fetch downloads the latest from remote without trying to merge or rebase anything.
+Then the git reset resets the master branch to what you just fetched. The --hard option changes all the files in your working tree to match the files in origin/master.
+---vagrant@kubemaster:~/devops/Devops/20210920_formation_devops_online/Ingress$ git fetch --all  ( je pesne je peu juste specifier un seul chemin )
+---vagrant@kubemaster:~/devops/Devops/20210920_formation_devops_online/Ingress$ git reset --hard origin/maine
+--https://forum.freecodecamp.org/t/git-pull-how-to-override-local-files-with-git-pull/13216
+
+
+rename fichier 
+--------------
+git mv old_filename new_filename
+git status
+git commit -m "Rename file"
+git push
+
+delete the lastest push commit: 
+--------------------------------
+
+
+------------------------
+change commit:
+*************
+git diff filename
+or 
+fit diff --staged
+-------------------
+
+rebase : avec click button
+-------------------
+accepter les modifs
+il fallait accepte les modif apres qui sont fait 
+git pull
+
+
+.gitignore:
+************
+ajouter des fichiers/ ou dossier que on exclue sur git , ue on shouhaite pas push 
+
+---------------------------
+merge + push + pullrequest
+----------------------------
+
+
+clone + upstream  : https://jdhao.github.io/2018/05/16/git-push-local-to-remote/
+------------------------------------------------------
+
+
+nassim.chetouani@DAV-EHLAMKT MINGW64 ~/Documents/Devops (master)
+$ git commit -m "init nginx folder"
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+
+Reponse :
+*********
+Your local branch doesn't know about the remote branch. If you don't tell git that your local branch (master) is supposed to compare itself to the remote counterpart (origin/master in this case); then git status won't tell you the difference between your branch and the remote one. So you should use:
+
+git branch --set-upstream-to origin/master
+or with the short option:
+git branch -u origin/master
+
+-----------------------------------------------
+$ git add hello_world.py
+warning: LF will be replaced by CRLF in nginx/hello_world.py.
+The file will have its original line endings in your working directory
+Reponse:
+********
+git config core.autocrlf true
+-----------------------------------------------
+
+Empyty folder:
+**************
+to add a local empty folder to remote 
+create a file .ignore
+  368  mkdir nginx
+  366  touch nginx/.gitignore
+  367  git add nginx/
+  371  git commit -m 'Empty directory' nginx
+  372  git push 
+-------------------------------------------------  
+Merge:
+******
+j'accède là ou je veux 'coller'
+exp la branch maine, je fais 
+	1 git merge master ( je recupère le folder nginx puis git push )
+	2 git push 
+
+Anuller un merge :
+*****************
+git merge --abort
+----------------------------------------------
+
+
+10 )GIT
+
+Annuler le dernier commit Git avec réinitialisation "rejeter toutes les modifications dans le répertoire de travail" =====  git reset   (--soft ou hard )  HEAD~1
+Git - Undo pushed commits                                                                                            =====  git revert <oldest_commit_hash>..<latest_commit_hash>    
+supprimer un commit 50                                                                                               =====  git revert <commit_hash>
+
+list des commits pushed =====                                                                                        =====  git log --pretty=oneline
+
+liste des changement sur un fichier                                                                                  ===== git log -p NOM_fichier
+
+
+Merger une branch:           aut s'assurer de la bon branch Confirmer la branche cible                                ====  git checkout MAbranche
+
+                             Fetch des derniers commits distants 
+
+
+
+rebase : je mis mon comit en decus des 22 autres et je deviens le 23, puis je Merge + TAG 
+ Git mERDE                                                                                                                 GIT BLAME
+
+------------------------------------
+Merge:
+******
+annuler le merge ----> git merge --abort
+	
+---------------------------------------
+Conflit de merge:
+*****************
+nassim.chetouani@DAV-EHLAMKT MINGW64 ~/Documents/Devops/nginx (maine)
+$ git pull
+Auto-merging nginx/hello_world.py
+CONFLICT (content): Merge conflict in nginx/hello_world.py
+Automatic merge failed; fix conflicts and then commit the result.
+
+nassim.chetouani@DAV-EHLAMKT MINGW64 ~/Documents/Devops/nginx (maine|MERGING)
+$ git pull branch maine
+error: Pulling is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+
+nassim.chetouani@DAV-EHLAMKT MINGW64 ~/Documents/Devops/nginx (maine|MERGING)
+$ git reset --hard HEAD~1
+HEAD is now at 9c9fabf add a seconde commit  (le ggood commit que je veux )
+
+nassim.chetouani@DAV-EHLAMKT MINGW64 ~/Documents/Devops/nginx (maine)
+$ git status
+On branch maine
+Your branch is behind 'origin/maine' by 1 commit, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+
+nothing to commit, working tree clean
+
+nassim.chetouani@DAV-EHLAMKT MINGW64 ~/Documents/Devops/nginx (maine)
+$ git pull
+Updating 9c9fabf..ec29e9f
+Fast-forward
+ nginx/hello_world.py | 1 +
+ 1 file changed, 1 insertion(+)
+-----------------------------------------------------------------------
+
+Delete file in remote:
+***********************
+  635  git rm --cached ./nginx/Dockerfile
+  636  git commit -m 'remove file dockerfile from nginx'
+  637  git push
+-----------------------------------------------------
+Bonjour Nafiz,
+pour cette semaine Nassim va re travailler ce qu'il a déjà vu en formation.
+et pour la semaine prochaine, il sera placé sur la migration d'une application NodeJs (interne à Davidson) sur son propre cluster kubernetes.
+Merci 

@@ -1,0 +1,25 @@
+minikube:
+installation:  https://minikube.sigs.k8s.io/docs/start/
+
+kubctl sur windows:
+*************************
+https://www.youtube.com/watch?v=UE1UqcaSYpM
+
+
+-----------------------------------------------
+Minikube on Windows Subsystem for Linux (WSL)
+https://magda.io/docs/installing-minikube.html
+
+
+----------------------------------------------
+$ systeminfo
+Configuration requise pour Hyper-V:
+    Un hyperviseur a été détecté. Les fonctionnalités nécessaires à Hyper-V ne seront pas affichées. (c'est lui qui loue la mimire gere le processus .....
+	
+---------------------------------------------
+WSL2 ou Hyper-V:
+****************
+J’ai trouvé que le contraire est vrai - si vous avez WSL 2 installé, vous ne pouvez pas utiliser des plates-formes de vm hébergées comme virtualbox, 
+mais si vous avez l’Hyper-V complet installé (qui peut être à côté de WSL 2), vous pouvez toujours les utiliser car virtualbox peut utiliser Hyper-V comme wrapper autour de l’interface de virtualisation du processeur. 
+
+ 

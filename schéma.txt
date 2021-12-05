@@ -1,0 +1,27 @@
+schéma:
+*******
+une imsage de shema 
+
+https://www.google.com/search?q=endpoint+et+svc+kubernetes+sch%C3%A9ma&sxsrf=AOaemvLsKQ1KulLTqZlgEFhfiG5nHI4Ndg:1632479131834&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjU34XWspfzAhWKxoUKHX2RBlcQ_AUoAXoECAEQAw&biw=1536&bih=739&dpr=1.25#imgrc=jeRUWy60bUKbSM
+
+shema Ingress:
+https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+Dans l'exemple ci-dessus :
+
+    Un Service Headless, appelé nginx, est utilisé pour contrôler le domaine réseau.
+    Le StatefulSet, appelé web, a une Spec indiquant que 3 réplicas du container nginx seront démarrés dans des Pods.
+    Le volumeClaimTemplates fournira un stockage stable utilisant des PersistentVolumes provisionnés par un approvisionneur de PersistentVolume.
+
+Le nom d'un objet StatefulSet doit être un nom de sous-domaine DNS valideyy
+
+-----------------------
+Voici une liste - non exhaustive - des principaux types de stockage :
+
+hostPath : Ce type de volume monte un fichier ou un répertoire du système de fichiers du nœud hôte dans votre pod.
+emptyDir : Il s'agit d'un type de volume créé lors de la première affectation d'un pod à un nœud. Il reste actif tant que le pod s'exécute sur ce nœud. Le volume est initialement vide et les conteneurs du pod peuvent lire et écrire les fichiers dans le volume emptyDir. Une fois le pod retiré du nœud, les données du répertoire vide sont effacées.
+secret : Un volume secret est utilisé pour transmettre des informations sensibles, telles que des mots de passe, à des pods.
+ConfigMap : La ressource ConfigMap fournit un moyen d’injecter des données de configuration dans les pods.
+persistentVolumeClaim : Un volume persistentVolumeClaim est utilisé pour monter un PersistentVolume dans un pod.
+Vous pouvez également voir que j'utilise le type de volume hostPath. Le dossier précisé à la suite de l'argument 
+sera donc partagé entre mon noeud hôte et le conteneur. 

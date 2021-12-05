@@ -1,0 +1,44 @@
+Service et Node
+***************
+
+
+----------------------------------
+http://www.salto-consulting.com/deploiement-sur-le-cloud-de-google-dune-application-dentreprise/
+
+Node Port:
+ Un service NodePort est le moyen le plus basique pour acheminer le trafic externe directement vers votre service. 
+NodePort, comme son nom l’indique, ouvre un port spécifique sur tous les nœuds (les machines virtuelles) et tout trafic envoyé à ce port est transféré au service.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    nodePort: 30008
+  selector:
+    app: nginx 
+	
+----------------------------------------
+IP adress External:
+*******************
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    tier: backend
+spec:
+  selector:
+    app: nginx
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 80
+  externalIPs:
+  - your_public_ip
+---------------------------------------

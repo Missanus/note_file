@@ -1,0 +1,11 @@
+Vagrant:
+********
+
+System load:  1.69              Processes:           95
+  Usage of /:   8.5% of 38.77GB   Users logged in:     0
+  Memory usage: 11%               IP address for eth0: 10.0.2.15
+  Swap usage:   0%                IP address for eth1: 192.168.0.42
+
+
+eth0 vs eth1 :
+**************

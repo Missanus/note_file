@@ -1,0 +1,1671 @@
+https://app.gotomeeting.com/?meetingId=802915021
+---------------------------------
+HPA
+Auto Scaling:
+*************
+link:  https://www.section.io/blog/scaling-horizontally-vs-vertically/
+
+
+limitRange + quota + class:
+***************************
+Un LimitRange est une stratégie visant à restreindre les allocations de ressources (aux pods ou aux conteneurs) dans un espace de noms. namespace
+ Un LimitRange fournit des contraintes qui peuvent : appliquer l'utilisation minimale et maximale des ressources de calcul par pod ou conteneur dans un espace de noms. namespace
+ Appliquez une demande de stockage minimale et maximale par PersistentVolumeClaim dans un espace de noms.
+---------------------------------------
+
+PriorityClass:
+A PriorityClass is a non-namespaced object that defines a mapping from a priority class name to the integer value of the priority. T
+
+limit ressource container:
+il continuera à fonctionner, mais le système d'exploitation le ralentira et continuera à déprogrammer l'utilisation du processeur .
+
+limitRange:
+***********
+on l'applique sur les POD ( sur l'ensemble des ressource de  POD) c'est le cumule de ressource comme reequest cpu ram
+//  //   //           conteneur docker ................
+---------------------------------------
+
+MaxLimitRequestRatio : POD et les Container
+[resource]inférieur ou égal à ( container.resources.limits[resource]/ container.resources.requests[resource])
+Si une configuration définit une maxLimitRequestRatiovaleur, alors tout nouveau conteneur doit avoir à la fois une requête et une valeur limite. 
+De plus, OpenShift Container Platform calcule un ratio limite/demande en divisant la limite par la demande.
+Cette valeur doit être un entier non négatif supérieur à 1.
+Par exemple, si un conteneur a cpu: 500dans la limitvaleur et cpu: 100dans la requestvaleur, alors son rapport limite sur demande pour cpuest 5. 
+Ce rapport doit être inférieur ou égal au maxLimitRequestRatio.
+MaxLimitRequestRatio[resource]inférieur ou égal à ( container.resources.limits[resource]/ container.resources.requests[resource]
+s'applique sur les POD et les Container
+Quota:
+
+définir des quoto sur secret , pod , 
+
+
+******************************************
+********************************************
+Pour edouard:
+
+
+=> 1 Cron job 
+    name: awesome-job
+    Triggers every Minutes
+    use a pod with a container that have an image busybox
+    the job is to execute a wget on the service awesome-service
+    to grabe the /volume/index.html
+    6 completions
+    2 in parallel
+    FORBID concurrency policy
+    Never restart on failure
+    
+    
+
+====================
+
+creer un fichier Vagrantfile
+
+---
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.define "kubmaster" do |kub|
+    kub.vm.box = "kwilczynski/ubuntu-16.04-docker"
+    kub.vm.hostname = 'kubmaster'
+
+    kub.vm.network :private_network, ip: "192.168.0.40"
+
+    kub.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--name", "kubmaster"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+
+  config.vm.define "kubnode" do |kubnode|
+    kubnode.vm.box = "kwilczynski/ubuntu-16.04-docker"
+    kubnode.vm.hostname = 'kubnode'
+
+    kubnode.vm.network :private_network, ip: "192.168.0.41"
+
+    kubnode.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--name", "kubnode"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+end
+
+---
+
+vagrant up
+
+vagrant ssh kubmaster
+vagrant ssh kubnode
+
+--- Sur tous les noeuds:
+sudo su
+swapoff -a
+vi /etc/fstab
+
+apt-get update && apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+add-apt-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+apt-get update && apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+
+mkdir -p /etc/docker
+
+cat <<EOF | tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+systemctl daemon-reload
+systemctl restart docker
+systemctl restart kubelet
+
+systemctl enable kubelet
+
+--- Sur le master uniquement  VERIFIEZ LES IPs
+
+kubeadm init --apiserver-advertise-address=192.168.0.40 --node-name $HOSTNAME --pod-network-cidr=10.244.0.0/16
+
+--- sur le master SANS LE ROOT
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+---- sur le master 
+curl https://docs.projectcalico.org/manifests/calico.yaml -O
+vi calico.yaml
+modifier CALICO_IPV4POOL_CIDR
+kubectl apply -f calico.yaml
+
+check le status 
+
+kubectl get pods -A
+
+sudo kubeadm token create --print-join-command
+
+--- Sur les nodes
+
+sudo kubeadm join <output du log d install>
+
+--- Sur tous les noeuds SPECIFIC VIRTUALBOX
+
+edit /etc/hosts
+
+remplacer les ips par master et node au lieu de 127.0.1.1
+
+=================
+
+kubectl api-resources --namespaced=false
+
+
+kubectl config view
+kubectl config get-contexts
+
+======== context
+
+kubectl create ns demo
+kubectl create deployment nginx --image nginx --n demo
+kubectl config set-context demo-context --namespace demo --user kubernetes-admin --cluster kubernetes
+kubectl config use-context demo-context
+
+retrournez dans le context kubernetes-admin@kubernetes
+
+======= resources
+
+metrics-server :  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+curl https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml -L -O
+
+modifier deployment 
+args:
+- --kubelet-insecure-tls
+
+kubectl apply -f components.yaml
+
+kubectl logs -f metrics-server-6dfddc5fb8-8ktt2 -n kube-system
+
+kubectl top node
+
+==== limits and requests
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        memory: 200M
+      limits:
+        memory: 500M
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 0.1
+      limits:
+        cpu: 1
+
+==== limitrange
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-lr
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: test-lr
+  namespace: test-lr
+spec:
+  limits:
+  - type: Container
+    max:            #Acceptable max
+      memory: 512M
+      cpu: 500m
+    min:            #Acceptable min
+      memory: 50M
+      cpu: 50m
+--- 
+kubectl get lr
+kubectl describe lr test-lr
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox1
+  namespace: test-lr
+spec:
+  containers:
+  - name: busybox-cnt01
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt01; sleep 10;done"]
+    resources:
+      requests:
+        memory: "100Mi"
+        cpu: "100m"
+      limits:
+        memory: "200Mi"
+        cpu: "500m"
+  - name: busybox-cnt02
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt02; sleep 10;done"]
+    resources:
+      requests:
+        memory: "100Mi"
+        cpu: "100m"
+  - name: busybox-cnt03
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt03; sleep 10;done"]
+    resources:
+      limits:
+        memory: "200Mi"
+        cpu: "500m"
+  - name: busybox-cnt04
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt04; sleep 10;done"]
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-lr
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: test-lr
+  namespace: test-lr
+spec:
+  limits:
+  - default:
+      memory: 100M
+      cpu: 100m
+    defaultRequest:
+      memory: 50M
+      cpu: 50m
+    type: Container
+    max:            #Acceptable max
+      memory: 512M
+      cpu: 500m
+    min:            #Acceptable min
+      memory: 50M
+      cpu: 50m
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: storagelimits
+  namespace: test-lr
+spec:
+  limits:
+  - type: PersistentVolumeClaim
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limit-memory-ratio-pod
+  namespace: test-lr
+spec:
+  limits:
+  - maxLimitRequestRatio:
+      memory: 2
+    type: Pod
+
+=== Quotas
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-quota
+---
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mem-cpu-demo
+  namespace: test-quota
+spec:
+  hard:
+    requests.cpu: 1
+    requests.memory: 1G
+    limits.cpu: 2
+    limits.memory: 2G
+    pods: 3
+---
+kubectl get quota -n test-quota
+kubectl describe quota  -n test-quota
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod1
+  namespace: test-quota
+spec:
+  containers:
+  - name: liveness
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 400m
+        memory: 600M
+      limits:
+        cpu: 800m
+        memory: 800M
+---
+==== Quota + priorityclass
+
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: premium
+value: 1000000 
+globalDefault: false
+description: "This priority class should be used for High priority service pods only."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: normal
+value: 1000 
+globalDefault: false
+description: "This priority class should be used for Normal priority service pods only."
+
+---
+
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-premium
+  spec:
+    hard:
+      cpu: 1
+      memory: 500M
+      pods: 3
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["premium"]
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-normal
+  spec:
+    hard:
+      cpu: 200m
+      memory: 100M
+      pods: 3
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["normal"]
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 200m
+        memory: 100M
+      limits:
+        cpu: 1
+        memory: 500M
+  priorityClassName: premium
+---
+************************************************************************ ram et la memory
+************************************************************************
+************************************************************************
+
+
+    1  exit
+    2  sudo su
+    3  mkdir -p $HOME/.kube
+    4  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    5  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    6  curl https://docs.projectcalico.org/manifests/calico.yaml -O
+    7  vi calico.yaml
+    8  cat calico.yaml | grep CALICO_IPV4POOL_CIDR
+    9  cat calico.yaml | grep org/ipv4pools
+   10  cat calico.yaml | grep org/ipv4pools:
+   11  cat calico.yaml | grep ipv4pools:
+   12  cat calico.yaml | grep icni
+   13  cat calico.yaml | grep CIDR
+   14  vi calico.yaml
+   15  cat calico.yaml | grep name
+   16  vi calico.yaml
+   17  cat calico.yaml | grep IPV4
+   18  vi calico.yaml
+   19  kubectl apply -f calico.yaml
+   20  curl https://docs.projectcalico.org/manifests/calico.yaml -O
+   21  kubectl apply -f calico.yaml
+   22  curl https://docs.projectcalico.org/manifests/calico.yaml -O
+   23  vi calico.yaml
+   24  kubectl apply -f calico.yaml
+   25  kubectl get nodes
+   26  kubectl get pods -A
+   27  kubectl get pods
+   28  kubectl get pods -A
+   29  sudo kubeadm token create --print-join-command
+   30  kubectl get pods -A
+   31  # export
+   32  export KUBECONFIG=/etc/kubernetes/admin.conf
+   33  kubectl apply -f calico.yaml
+   34  sudo kubectl apply -f calico.yaml
+   35  kubectl get pods
+   36  sudo kubectl get pods
+   37  sudo kubectl get pods -A
+   38  chmod 777 /etc/kubernetes/admin.conf
+   39  sudo chmod 777 /etc/kubernetes/admin.conf
+   40  kubectl get pods -A
+   41  systemctl enable kubelet
+   42  clear
+   43  kubectl get pods -A
+   44  vi /etc/hosts
+   45  sudo vi /etc/hosts
+   46  kubectl delete pod --all -n kube-system
+   47  kubectl get pod -A -o wide
+   48  curl https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml -L -O
+   49  ls
+   50  cat components.yaml
+   51  vi components.yaml
+   52  kubectl apply -f components.yaml
+   53  kubectl get pods
+   54  kubectl get pod
+   55  kubectl top node
+   56  kubectl get pod -A
+   57  kubectl describe pod
+   58  kubectl describe pod metrics-server-68c5cfbfbf-vjb9h
+   59* kubectl describe pod metrics-server-68c5cfbfbf-vjb9h  -n kube-sys
+   60  kubectl get node
+   61  sudo kubeadm token create --print-join-command
+   62  kubectl get nodes
+   63  kubectl top nodes
+   64  vi pod.yaml
+   65  kubectl apply -f pod.yaml
+   66  vi pod.yaml
+   67  kubectl apply -f pod.yaml
+   68*
+   69  kubectl apply -f pod.yaml
+   70  kubectl get podes
+   71  kubectl get pods
+   72  kubectl delete -f pod.yaml
+   73  cat pod.yaml
+   74  cp pod.yaml  namespac.yaml
+   75  vi namespac.yaml
+   76  kubectl apply -f namespac.yaml
+   77  touch namespacet.yaml
+   78  vi namespacet.yaml
+   79  kubectl apply -f namespacet.yaml
+   80  kubectl delete -f namespacet.yaml
+   81  kubectl get quota -n test-quota
+   82  vi namespacet.yaml
+   83  kubectl apply -f namespacet.yaml
+   84  kubectl get quota -n test-quota
+   85  vi namespacet.yaml
+   86  kubectl apply -f namespacet.yaml
+   87  kubectl get pods
+   88  kubectl get pods -n test-quota
+   89  kubectl get quota
+   90  kubectl get quota -n test-quota
+   91  vi namespacet.yaml
+   92  clear
+   93  kubectl apply -f namespacet.yaml
+   94  vi namespacet.yaml
+   95  kubectl delete -f namespacet.yaml
+   96  kubectl apply -f namespacet.yaml
+   97  kubectl get pods
+   98  kubectl get pods -n test-quota
+   99  kubectl apply -f namespacet.yaml
+  100  kubectl get quota
+  101  kubectl get quota -n test-quota
+  102  vi namespacet.yaml
+  103  kubectl delete -f namespacet.yaml
+  104  vi namespacet.yaml
+  105  vi list.yaml
+  106  vi classe.yaml
+  107  kubectl apply -f classe.yaml
+  108  kubectl explain priorityClass
+  109  vi classe.yaml
+  110  kubectl apply -f classe.yaml
+  111  kubectl get priorityClass
+  112  kubectl apply -f list.yaml
+  113  7
+  114  kubectl get guota
+  115  kubectl get quota
+  116  vi list.yaml
+  117  vi pod1.yaml
+  118  kubectl apply -f pod1.yaml
+  119  kubectl get quota
+  120  kubectl delete -f pod1.yaml
+  121  cp pod1.yaml pod2prem.yaml
+  122  vi pod2prem.yaml
+  123  kubectl delete -f pod2prem.yaml
+  124  kubectl apply -f pod2prem.yaml
+  125  kubectl get quota
+  126  kubectl delete -f pod2prem.yaml
+  127  cat classe.yaml
+  128  vi pod2prem.yaml
+  129  kubectl apply -f pod2prem.yaml
+  130  kubectl get quota
+  131  kubectl delete -f pod2prem.yaml
+  132  kubectl get quota
+  133  vi pod2prem.yaml
+  134  kubectl apply -f pod2prem.yaml
+  135  vi pod2prem.yaml
+  136  kubectl apply -f pod2prem.yaml
+  137  kubectl get quota
+  138  history
+
+---------------------------------------------------------------------------------------------
+
+Pour edouard:
+
+
+=> 1 Cron job 
+    name: awesome-job
+    Triggers every Minutes
+    use a pod with a container that have an image busybox
+    the job is to execute a wget on the service awesome-service
+    to grabe the /volume/index.html
+    6 completions
+    2 in parallel
+    FORBID concurrency policy
+    Never restart on failure
+    
+    
+
+====================
+
+creer un fichier Vagrantfile
+
+---
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.define "kubmaster" do |kub|
+    kub.vm.box = "kwilczynski/ubuntu-16.04-docker"
+    kub.vm.hostname = 'kubmaster'
+
+    kub.vm.network :private_network, ip: "192.168.0.40"
+
+    kub.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--name", "kubmaster"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+
+  config.vm.define "kubnode" do |kubnode|
+    kubnode.vm.box = "kwilczynski/ubuntu-16.04-docker"
+    kubnode.vm.hostname = 'kubnode'
+
+    kubnode.vm.network :private_network, ip: "192.168.0.41"
+
+    kubnode.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.customize ["modifyvm", :id, "--name", "kubnode"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+end
+
+---
+
+vagrant up
+
+vagrant ssh kubmaster
+vagrant ssh kubnode
+
+--- Sur tous les noeuds:
+sudo su
+swapoff -a
+vi /etc/fstab
+
+apt-get update && apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+add-apt-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+apt-get update && apt-get install -y kubelet kubeadm kubectl kubernetes-cni
+
+mkdir -p /etc/docker
+
+cat <<EOF | tee /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+systemctl daemon-reload
+systemctl restart docker
+systemctl restart kubelet
+
+systemctl enable kubelet
+
+--- Sur le master uniquement  VERIFIEZ LES IPs
+
+kubeadm init --apiserver-advertise-address=192.168.0.40 --node-name $HOSTNAME --pod-network-cidr=10.244.0.0/16
+
+--- sur le master SANS LE ROOT
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
++
+sudo chmod 777 /etc/kubernetes/admin.conf
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+---- sur le master 
+curl https://docs.projectcalico.org/manifests/calico.yaml -O
+vi calico.yaml
+modifier CALICO_IPV4POOL_CIDR
+eschap esc /CALICO_IPV4POOL_CIDR  -- > 10.244.0.0/16
+
+kubectl apply -f calico.yaml
+
+check le status 
+
+kubectl get pods -A
+
+sudo kubeadm token create --print-join-command
+
+--- Sur les nodes
+
+sudo kubeadm join <output du log d install>
+
+--- Sur tous les noeuds SPECIFIC VIRTUALBOX
+
+edit /etc/hosts
+
+remplacer les ips par master et node au lieu de 127.0.1.1
+
+=================
+
+kubectl api-resources --namespaced=false
+
+
+kubectl config view
+kubectl config get-contexts
+
+======== context
+
+kubectl create ns demo
+kubectl create deployment nginx --image nginx --n demo
+kubectl config set-context demo-context --namespace demo --user kubernetes-admin --cluster kubernetes
+kubectl config use-context demo-context
+
+retrournez dans le context kubernetes-admin@kubernetes
+==>>
+nassim@kubemaster:/home$ kubectl config get-contexts
+CURRENT   NAME                          CLUSTER      AUTHINFO           NAMESPACE
+*         kubernetes-admin@kubernetes   kubernetes   kubernetes-admin
+
+======= resources
+
+metrics-server :  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+curl https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml -L -O
+
+modifier deployment 
+args:
+- --kubelet-insecure-tls
+
+kubectl apply -f components.yaml
+
+nassim@kubemaster:/home$ kubectl get pods -n kube-system
+kubectl logs -f metrics-server-6dfddc5fb8-8ktt2 -n kube-system
+
+kubectl top node
+
+***
+***
+***
+amir@kubemaster:/home$ sudo openssl genrsa -out amir.key 2048
+openssl req -new -key amir.key  -out jean.csr  -subj "/CN=amir"
+# With a Group where $group is the group name
+sudo openssl req -new -key amir.key  -out amir.csr  -subj "/CN=amir/O=amir"
+sudo openssl x509 -req -in amir.csr  -CA /etc/kubernetes/pki/ca.crt  -CAkey /etc/kubernetes/pki/ca.key  -CAcreateserial  -out amir.crt -days 500
+
+==== limits and requests
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        memory: 200M
+      limits:
+        memory: 500M
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 0.1
+      limits:
+        cpu: 1
+
+==== limitrange
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-lr
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: test-lr
+  namespace: test-lr
+spec:
+  limits:
+  - type: Container
+    max:            #Acceptable max
+      memory: 512M
+      cpu: 500m
+    min:            #Acceptable min
+      memory: 50M
+      cpu: 50m
+--- 
+kubectl get lr
+kubectl describe lr test-lr
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox1
+  namespace: test-lr
+spec:
+  containers:
+  - name: busybox-cnt01
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt01; sleep 10;done"]
+    resources:
+      requests:
+        memory: "100Mi"
+        cpu: "100m"
+      limits:
+        memory: "200Mi"
+        cpu: "500m"
+  - name: busybox-cnt02
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt02; sleep 10;done"]
+    resources:
+      requests:
+        memory: "100Mi"
+        cpu: "100m"
+  - name: busybox-cnt03
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt03; sleep 10;done"]
+    resources:
+      limits:
+        memory: "200Mi"
+        cpu: "500m"
+  - name: busybox-cnt04
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo hello from cnt04; sleep 10;done"]
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-lr
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: test-lr
+  namespace: test-lr
+spec:
+  limits:
+  - default:
+      memory: 100M
+      cpu: 100m
+    defaultRequest:
+      memory: 50M
+      cpu: 50m
+    type: Container
+    max:            #Acceptable max
+      memory: 512M
+      cpu: 500m
+    min:            #Acceptable min
+      memory: 50M
+      cpu: 50m
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: storagelimits
+  namespace: test-lr
+spec:
+  limits:
+  - type: PersistentVolumeClaim
+    max:
+      storage: 2Gi
+    min:
+      storage: 1Gi
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limit-memory-ratio-pod
+  namespace: test-lr
+spec:
+  limits:
+  - maxLimitRequestRatio:
+      memory: 2
+    type: Pod
+
+=== Quotas
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-quota
+---
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mem-cpu-demo
+  namespace: test-quota
+spec:
+  hard:
+    requests.cpu: 1
+    requests.memory: 1G
+    limits.cpu: 2
+    limits.memory: 2G
+    pods: 3
+---
+kubectl get quota -n test-quota
+kubectl describe quota  -n test-quota
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod1
+  namespace: test-quota
+spec:
+  containers:
+  - name: liveness
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 400m
+        memory: 600M
+      limits:
+        cpu: 800m
+        memory: 800M
+---
+==== Quota + priorityclass
+
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: premium
+value: 1000000 
+globalDefault: false
+description: "This priority class should be used for High priority service pods only."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: normal
+value: 1000 
+globalDefault: false
+description: "This priority class should be used for Normal priority service pods only."
+
+---
+
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-premium
+  spec:
+    hard:
+      cpu: 1
+      memory: 500M
+      pods: 3
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["premium"]
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-normal
+  spec:
+    hard:
+      cpu: 200m
+      memory: 100M
+      pods: 3
+    scopeSelector:
+      matchExpressions:
+      - operator : In
+        scopeName: PriorityClass
+        values: ["normal"]
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busy-pod
+spec:
+  containers:
+  - name: liveness
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 600
+    resources:
+      requests:
+        cpu: 200m
+        memory: 100M
+      limits:
+        cpu: 1
+        memory: 500M
+  priorityClassName: premium
+---
+
+=============== Jour 2
+
+--- HPA
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  selector:
+    matchLabels:
+      run: php-apache
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: php-apache
+    spec:
+      containers:
+      - name: php-apache
+        image: k8s.gcr.io/hpa-example
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+  labels:
+    run: php-apache
+spec:
+  ports:
+  - port: 80
+  selector:
+    run: php-apache
+---
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+---
+kubectl get hpa
+---
+kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: php-apache
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+---
+targetCPUUtilizationPercentage: 20
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: php-apache
+spec:
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 10
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 2
+  maxReplicas: 15
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 20
+--- PV PVC et Volumes
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1G
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv1"
+---
+kubectl get pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 500M
+---
+kubectl get pvc
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: my-pvc-volume
+  volumes:
+  - name: my-pvc-volume
+    persistentVolumeClaim:
+      claimName: my-pvc
+---
+==== nodeselector
+kubectl taint nodes $(hostname) node-role.kubernetes.io/master:NoSchedule-
+
+---
+kubectl label node kubnode disk=ssd
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    kubernetes.io/hostname: kubmaster
+--- Node affinity
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      # requiredDuringSchedulingIgnoredDuringExecution:
+      #   nodeSelectorTerms:
+      #   - matchExpressions:
+      #     - key: kubernetes.io/e2e-az-name
+      #       operator: In
+      #       values:
+      #       - e2e-az1
+      #       - e2e-az2
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: disk
+            operator: In
+            values:
+            - ssd
+  containers:
+  - name: with-node-affinity
+    image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly
+  labels:
+    friendly: high
+spec:
+  containers:
+    - name: pod-friendly
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-must
+spec:
+  containers:
+    - name: pod-friendly-must
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: friendly
+            operator: In
+            values:
+            - high
+        topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-want
+spec:
+  containers:
+    - name: pod-friendly-want
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: friendly
+              operator: In
+              values:
+              - high
+          topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-must-not
+spec:
+  containers:
+    - name: pod-friendly-must-not
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: friendly
+                operator: In
+                values:
+                  - high
+          topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-friendly-want-not
+spec:
+  containers:
+    - name: pod-friendly-want-not
+      image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: friendly
+                  operator: In
+                  values:
+                    - high
+            topologyKey: kubernetes.io/hostname
+---
+=============================================
+
+redis:3.2-alpine
+registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+
+kubectl taint nodes $(hostname) node-role.kubernetes.io/master:NoSchedule-
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - nginx
+              topologyKey: kubernetes.io/hostname
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+               matchExpressions:
+                 - key: app
+                   operator: In
+                   values:
+                   - redis
+             topologyKey: kubernetes.io/hostname
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cache
+  labels:
+    app: redis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:3.2-alpine
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                   matchExpressions:
+                     - key: app
+                       operator: In
+                       values:
+                         - redis
+              topologyKey: kubernetes.io/hostname
+=== Taints et tolerations
+
+kubectl taint node kubnode maintenance=true:NoSchedule
+
+kubectl taint node kubnode maintenance:NoSchedule-
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+      tolerations:
+      - key: maintenance
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+        ###
+     - key: "maintenance"
+       operator: "Exists"
+       effect: "NoSchedule"
+
+======= Statefulsets
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+    targetPort: 80
+  clusterIP: None
+  selector:
+    app: nginx
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv0"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv1"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv2
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv2"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv3
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv3"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv4
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100M
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/tmp/pv4"
+    
+--- 
+
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: manual
+      accessModes: 
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100M
+
+
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-sts
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  serviceName: nginx
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:latest
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: www
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: manual
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100M
+          
+          
+---
+
+kubectl run -i --tty --image busybox:1.28 dns-test --restart=Never --rm
+
+kubernetes.io/change-cause
+
+podManagementPolicy: Parallel
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-sts
+  labels:
+    app: nginx
+spec:
+  replicas: 4
+  podManagementPolicy: Parallel
+  serviceName: nginx
+  selector:
+    matchLabels:
+      app: nginx
+  updateStrategy: #
+    type: RollingUpdate
+    rollingUpdate:
+       partition: 0
+  template:
+    metadata:
+      labels:
+        app: nginx
+      annotations:
+        kubernetes.io/change-cause: '1.19'
+    spec:
+      containers:
+      - name: nginx
+        image: registry.gitlab.onlineterroir.com/omega/public-reg/nginx:1.19
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: www
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      storageClassName: manual
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100M
+===
+
+kubectl rollout pause statefulset nginx-sts
+
+

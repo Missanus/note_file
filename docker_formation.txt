@@ -1,0 +1,183 @@
+
+
+dOCKER/
+********
+SANS RAM NI CPU NI PROCESSUS SAUF DE LA MEMOIRE 
+
+Image Docker :
+c'est un systèm de fichier sans le porcessus (mémoires) =! différent d'un VM (RAM, processus, memoires)
+génerée par un Dockerfile
+une image est composée de plusieurs couches superposées 
+stocker sous forme de registre ( comme dockerhub est est un registre public / comme ça etre privé, exp server gitlab)
+pull instance:
+**************
+		image: docker pull nginx
+
+puis docker images:
+*******************
+$ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED      SIZE
+nginx        latest    ad4c705f24d3   3 days ago   133MB
+
+taguer tag votre image:
+*******************
+$ docker tag <image_a_taguer> <votre_username_Dockerhub>/<nouveau_nom>  ==> docker tag nginx  nginxnass
+
+push images
+***********	
+docker push <username_Dockerhub>/<nom_image>  ==> docker push nginxnass
+
+quelques commandes:
+*******************
+Des mots clés pour décrire une image. Le Dockerfile est descriptif
+
+
+FROM : Obligatoire - permet de baser son image sur une autre
+MAINTAINER : Informations sur le développeur du Dockerfile
+RUN : permet d'exécuter des commandes dans un shell du docker
+ADD : ajoute un fichier depuis la machine locale vers un dossier du conteneur
+COPY : Copie un fichier de la machine locale ou du conteneur vers un conteneur
+CMD : première commande exécutée lors du lancement du conteneur, CMD va attacher les processus du lancement au Entrypoint, donc c'est y a une error dans le 
+			CMD c'est la ou est programmé l'arrêt du conteneur, docker est stoppé
+ENTRYPOINT : commande par défaut exécutée lors du lancement du conteneur pour maintenair le conteneur au démrrage ( ps 1) 
+EXPOSE : expose le port du conteneur (détaillé plus tard)
+WORKDIR : espace de travail
+********************************
+******************************
+1 # ubuntu:14.04
+2 # Prénom Nom <prenom.nom@bar.com>
+3 # apt-get -y update
+4 # apt-get install -y nginx
+6 # 80 443
+5 # ["nginx", "-g", "daemon off;"] # Première commande à exécuter
+  1 FROM ubuntu:14.04
+  2 MAINTAINER missan docker
+  3 RUN apt-get -y update
+  4 RUN apt-get install -y nginx
+  5 EXPOSE 80 443
+  6 CMD ["nginx", "-g", "daemon off;]
+
+*********************************
+*********************************
+EXPOSE 8080 l'appliction écoute sur le port 8080, tout ce qui vient sur le port 8080 elle le recoit 
+*******
+********
+docker client va interagir avec le docker-daemon "Nous pouvons intéragir avec le docker démon au travers d'un docker client (commandes "docker pull/push/...")"
+docker client avant de lancer une image, il va chercher en local si il en a une image , si oui, il va la lancer, sinon il va la chercher sur un docker hub
+
+$ docker run -d nassimchet (mon image)
+462f6368087a9cf911722628f5b3847dfffdad9754b1589fcb3e2263c8d555f1
+	
+$ docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED              STATUS          PORTS     NAMES
+462f6368087a   nassimchet   "/docker-entrypoint.…"   About a minute ago   Up 59 seconds   80/tcp    condescending_burnell
+
+Eteignez l'image nginx $ docker stop <id_container>
+docker stop 462f6368087a
+
+Connectez-vous sur Play With Docker
+Créez un Dockerfile simple
+Buildez le Dockerfile avec $ docker build  -t <nom_de_l'image> .  (le point est nécessaire)
+docker build -t nassiminmagenginx .  ( docker file contien des run run et cmd 
+
+démarrer/ run docker image: (-d detache, le conteneur est détaché + --rm , une fois il f fini il sera supprimer) 
+docker run -d nassiminmagenginx 
+
+Deelte image
+************
+Détruisez l'image avec $ docker rmi -f <id_de_l'image>
+
+
+MAPPAGE + Communication
+************************
+Démarrez l'image avec les paramètres de mappage de port $ docker run -d -p 80:80 nginx
+ ecouter le port:  curl localhost
+stop ciontainer : docker stop id_contenur
+
+
+
+Volume 
+***********************
+docker volume inspect VOLUME_NAmes
+Time to shine
+
+Objectif : Monter un fichier dans votre docker
+
+    Connectez-vous sur Play With Docker
+    Récupérez l'image "nginx"
+    Créez un dossier vide sur votre machine locale "datas" $ mkdir datas
+    Créez un fichier "test" dans datas $ cd datas && touch test
+    Démarrez le docker "nginx" en montant le dossier "datas" comme un volume docker $ docker run -d -p 80:80 -v ./datas:/usr/share/nginx/html nginx
+	$ docker run -d -p 80:80 -v //c//Users//nassim.chetouani//Documents//20210914_dockerformation//Datas:/usr/share/nginx/html nginx   ( la bonne syntax sous windows )
+	docker run -d -p 80:80 -v //Datas:/usr/share/nginx/html nginx
+	linux :  $ docker exec -t 3a2 ls /usr/share/nginx/html
+    Vérifiez que le fichier est bien monté dans le conteneur avec $ docker exec -t <id_conteneur> ls /usr/share/nginx/html
+    Eteignez votre docker
+   docker exec -it <id_conteneur> /bin/bash vous permet d'ouvrir un shell dans votre conteneur
+
+   -v local volume host : container directory 
+   -v /usr/local/bin ==  the irectory us just in docker ( on l'appell anonymous valumes)
+   -v name:/var/.... create a reference valumes 
+
+
+lsiter volume :
+****************
+$ docker volume ls
+DRIVER    VOLUME NAME
+local     2d8d96661ea7c5142b5cdfd62f255c1ea6dfe3c35474733177dd271514e3181b
+local     myvol1
+
+deelte volume:
+***************
+ docker volume rm [OPTIONS] VOLUME [VOLUME...]	
+ $ docker volume rm myvol1
+ $ docker volume insepct myvol1
+
+daemon off
+********
+What does Nginx daemon off do?
+For Docker containers (or for debugging), the daemon off; directive tells Nginx to stay in the foreground.
+For containers this is useful as best practice is for one container = one process. One server (container) has only one service.
+
+
+
+
+
+
+
+
+Installation
+************
+stp 1 : link : https://docs.microsoft.com/en-us/windows/wsl/install-win10
+
+windows doesn't support HyperV donc le rempalcer par WSL2
+CMD :   Enable-WindowsOptionalFeature -Online -FeatureName $("VirtualMachinePlatform","Microsoft-Windows-Subsystem-Linux") 
+Step 4 - Download the Linux kernel update package
+Download the latest package:
+WSL2 Linux kernel update package for x64 machines
+
+
+enalbele hyper VM
+*****************
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart  (admin)
+Enable-WindowsOptionalFeature -Online -FeatureName $("VirtualMachinePlatform","Microsoft-Windows-Subsystem-Linux")
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v
+
+
+
+backlog == cahier de charge
+dans le 8 du devops:
+
+cycle dev: plan  deploy  build test 
+cycle ops: relaease deploy operating monitoring 
+
+ 
+ 
+Centralisation des conteneurs possible
+Installation unique d'environnement
+Isoprod
+
+
+Complexe à déployer
+Unique à MacOs

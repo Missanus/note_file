@@ -1,0 +1,354 @@
+formation cloud 101 BNP:
+************************
+
+A chercher:
+-----------
+solutions anti-spams
+
+
+**************************************************************
+**************************************************************
+**************************************************************
+LES POINTS FOR du CLOUD
+-----------------------
+- 1 c'est un service à la demande 
+- 2 un service mesurable ( le fournisseur le client peuvent mesurer leur consomations
+- 3 il paye juste ce que il utilise (utilisateur)
+- 4 la mutualisation de ressource, ces ress sont partager entre l'ensemble de ses clients sans savoir 
+élasciticté du cloud en adaptant les ressoures aux variations du cloud 
+
+5 - élasticité des ressources: la capicite d'allouer dynamiquement des ressources temporaires , soit  la baisse, la ahausse , temporaire ou durable 
+  d'une manière rapide 
+  
+  
+LES SERVICES CLOUD SONT CATEGORISES
+------------------------------------
+il y a trois modèle d'utilisation du cloud selon la couche fonctionnelle
+
+IAAS infrs as A service :
+il fournit des instance  d'os et l'ensemble de l'infra sou-jacent (réseau, sotckage ...)
+exemple de fournir des VM temporaires, augumenter le stockage de VM ...
+l'utilisateur et le client service doit gérer les applications et les middlewares et les applciations
+population cible sont les exploitants informatiques  
+
+P		:  plateform as A servie: 
+couche prise en charge par le fournisseur cloud 
+fournit des instance middlewares et de contexte d'exécution + les couches techniques du IAAS
+exemple d'usage : BDD, fourniture de serveurs d'applicaion 
+l'application est à la charge du client 
+utilisateur: développeur 
+
+SAAS: software as A service:
+Fournit des applications prêtes à l'emploi, s'exécutant sur l'infra du fournisseur cloud 
+accessible via le navigateur client, comme une messagerie en ligne comme google doc
+
+Finir:
+couche:
+   Géré par le Fournisseur Cloud   ****  Géré par le Client (consommateur)
+   ----------------------------------------------------------------------
+IAAS: reseau -- stockage  --  serveur --- vitualistion ***** OS executable middllewares -- executable -- Code   --  Données  (Application)
+CASS: reseau -- stockage  --  serveur --- vitualistion -- OS/ Conteneur  --  executable middllewares -- executable -- Code   --  Données  (Application)
+PAAS: reseau -- stockage  --  serveur --- vitualistion  OS executable middllewares -- executable --  ****  Code   --  Données  (Application)
+SAAS: reseau -- stockage  --  serveur --- vitualistion  OS executable middllewares -- executable -- Code   --  ***** Données  (Application)
+*************************************************************
+**************************************************************
+**************************************************************
+
+3 PILIERS SECURITAIRES (slide 17)
+1 - La protection des données
+Pour protéger ses données, l’entreprise doit:
+
+- Identifier et classifier (cf. Blueprint)
+- Chiffrer ses données enregistrées 
+- Mettre en place une gestion des clés de chiffrement 
+
+2 - La gestion des identités et des accès
+Pour sécuriser un environnement Cloud, il faut également pouvoir définir qui a besoin de quoi et qui peut faire quoi.
+mise en place d’une gouvernance d’identités basée sur la gestion des identités et du contrôle d’accès (IAM, Identity and Access Management).
+Associer des rôles et des privilèges à des identités permettra ainsi de maitriser l’accès aux données, services, applications, etc.
+
+3 - Le monitoring actif
+Ce monitoring actif permet ainsi d’assurer une protection continue et d’être en capacité de réagir immédiatement.
+
+
+**************************************************************
+**************************************************************
+**************************************************************
+
+DE DEVOPS À DEVSECOPS:
+Il faut donc repenser la manière dont les projets de développement sont conçus, pour une sécurité de bout en bout :
+construction, gestion et fonctionnement
+
+Il doit gérer le cycle de vie de l'application 
+C’est toute l’architecture qui s’en trouvera impactée : la façon de concevoir l’application, le type de données à utiliser, le
+degré de classification, la gestion des accès, les charges de travail, etc.
+
+**************************************************************
+**************************************************************
+**************************************************************
+
+STRATÉGIE ET GOUVERNANCE CLOUD BNP PARIBAS
+--------------------------------------------
+
+Comprendre la stratégie BNP Paribas (slid	 24)
+TRAJECTOIRE CLOUD DE BNP PARIBAS ( 2013 - 2018 (IBM et AWS pour tests )  2021 (IBM  LANCEMENT DU CLOUD DÉDIÉ , hautement sécuritaire)
+
+
+Avoir une meilleure maitrise de la localisa@on du stockage des données sensibles
+Augmenter le panel des services
+Réduire le risque de vulnérabilité vis-à-vis des problèmes de panne de datacenters
+Optimiser ses coûts
+
+BNP PARIBAS INVESTIT DANS SA TRANSFORMATION VERS LE CLOUD (slide 26)
+UNE TRANSFORMATION CONTINUE POUR RELEVER LES PRINCIPAUX DÉFIS  (slide 27)
+BNP Paribas a besoin des tirer profit des avantages d'innovation et de rapidité d'un Cloud public toute en appliquant la haute sécurité d'un Cloud privé
+
+QU’EST CE QUE LE CLOUD DEDIEE BNP Paribas 
+-----------------------------------------
+3 zones de haute disponibilité pour les SLA extremes
+Dans les locaux BNP Paribas
+Cryptage dans un module de sécurité matériel (HSM) géré par BNP Paribas pour une sécurité à notre main
+
+**************************************************************
+**************************************************************
+**************************************************************
+Nous adoptons une stratégie hybride pour maximiser les capacités et tirer profit de chaque types de Clouds
+CLOUD PRIVE ++   CLOUD DEDIE ++ CLOUD PUBLIC  ++   == >>  STRATEGIE CLOUD HYBRIDE
+
+OBJECTIFS D’UNE STRATEGIE HYBRIDE
+---------------------------------
+Budget  securté  innovation  scalabilité performance	 
+
+MZR: didié mutlple zone 
+
+**************************************************************
+**************************************************************
+**************************************************************
+NOUVEAUX ROLES
+Se familiariser avec les nouveaux rôles pour
+accompagner le déploiement du Cloud         (42 slide )
+
+transverse:	
+**************************************************************
+**************************************************************
+**************************************************************
+DE NOUVEAUX ROLES POUR ACCOMPAGNER LE DEPLOIEMENT DU CLOUD:
+-----------------------------------------------------------
+FinOps
+FinOps fournit des conseils sur la
+façon d'utiliser efficacement les
+services Cloud. Il aide les équipes à
+mieux comprendre et contrôler les
+dépenses Cloud. Il contribue à
+développer une communication forte
+entre les équipes de DevOps et les
+équipes financières.
+
+Offering Manager:
+-----------------
+L'Offering Manager guide les équipes
+crossfonctionnelles pour définir, construire et
+promouvoir avec succès les offres clouds
+BNP Paribas, conçues pour un marché
+d'utilisateurs. Les utilisateurs profiteront d'un
+expérience de bout en bout de l'offre
+permettant ainsi d'utiliser cette offre de façon
+optimale, et par conséquent, permettre à
+BNP Paribas de maintenir / développer le
+modèle commercial de l'offre.
+
+SRE
+---
+Un “Service Reliability Engineer” est
+chargé de la disponibilité, de la qualité et
+de la résilience des services et des
+applications Clouds, et ce, pour chaque
+type de Clouds. Son principal objectif est
+d’assurer l'accord de niveau de service
+(SLA) de son périmètre.
+
+
+**************************************************************
+**************************************************************
+**************************************************************
+FAQ S’informer en consultant les quesAons les plus fréquemment posées:
+----------------------------------------------------------------------
+
+ITG:
+Dois-je passer par ITG pour consommer le public IBM Cloud ou VPC ?
+ Non, le contrat cadre est défini entre le groupe et IBM Cloud. D'autre part, le contrat pour le Cloud dédié appar4ent à ITG.
+Ce serait une meilleure op4on, si vous avez besoin du Cloud dédié, d’obtenir toute votre consomma4on IBM Cloud à travers
+ITG.
+
+**************************************************************
+**************************************************************
+**************************************************************
+INTRODUCTION À LA GOUVERNANCE CLOUD : 	CLOUD BLUEPRINT:
+--------------------------------------------------------
+Shadow IT (utilisation non-encadrée de solutions Cloud en dehors de la 	gouvernance informatique du Groupe)
+
+
+**************************************************************
+**************************************************************
+**************************************************************
+Le Cloud : source d’opportunités
+---------------------------------
+1. Créer un avantage compétitif :
+2. Améliorer le time to market : Ne perdez plus de temps à chercher une place de parking - sautez du taxi et filez à votre rendez-vous.
+3. Gagner en flexibilité :
+5. Améliorer l’efficience opérationnelle :
+.
+.
+
+**************************************************************
+**************************************************************
+**************************************************************
+
+CLOUD Act : Clarifying Lawful Overseas Use of Data Act
+---------
+Le CLOUD Act est une loi américaine qui précise que les autorités judiciaires américaines sont, dans le cadre d’une enquête sur des crimes graves, en
+mesure d’avoir accès aux données détenues par des fournisseurs de services Internet même si elles se
+trouvent en dehors des États-Unis
+
+
+
+56 57 58 59 60 61 
+**************************************************************
+**************************************************************
+**************************************************************
+
+slide (63)
+Règles spécifiques aux Clouds
+Les différentes contraintes listées précédemment 	soulèvent deux principaux sujets d’attention : la protection des données et la continuité des services.
+Huit règles directrices ont été établies pour aborder es deux sujets.
+
+CMAT:
+-----
+La Cloud Maturity Assurance Team (CMAT) est une
+équipe dédiée, mandatée au niveau Groupe et
+rattachée au Comité de Direction Générale de la Filière IT.
+La CMAT est responsable de l’évolution du Cloud Blueprint.
+La CMAT apporte au niveau Groupe des éclairages
+sur la stratégie, les usages et les risque du Cloud.
+Elle intervient en support au Cloud Programme.
+La CMAT monitore les usages Cloud dans le Groupe
+(Cloud Register) en coordination avec les fonctions
+Risque.
+La CMAT instruit les demandes de dérogations aux
+règles du Cloud Blueprint (cf. ci-dessous).
+
+
+Le Coud Enablement Council:
+
+ est composé de
+représentants des Entités, des Fonctions Groupe (Risques, Juridique, Achat, Risques IT…) et des comités transversaux (Comités d’Architectes, etc.),
+avec un mandat fédéral rattaché à la CMAT.
+
+Ils agissent en délégués de la CMAT avec mandat de
+de promouvoir le Cloud Blueprint et de renforcer la maturité de leur entité sur les sujets Cloud via des
+actions appropriées, ainsi que des partages d’information et d’expérience avec leurs pairs.
+Ils gèrent et communiquent l’inventaires des usages Cloud de leur entité (Cloud Register).
+
+Ils remontent auprès de la CMAT les exceptions au Cloud Blueprint pour dérogation ou remédiation.
+
+Les Comités de Validation IT (CVIT) conservent leurs prérogatives actuelles
+
+**************************************************************
+**************************************************************
+**************************************************************
+
+CLASSIFICATION DES DONNEES
+--------------------------
+Donnée secrète
+Donnée confidentielle
+Données Personnelles Sensibles
+Données restreintes
+données qui ne sont ni secrètes ni confidentielles, mais qui ne sont pas non plus destinées à être diffusées publiquement.
+Données publiques : données librement ou légalement accessibles en dehors du Groupe.
+
+
+
+PROTECTION DES DONNEES
+1* Chiffrement
+2 * Masquage des données
+
+			1 -  L'anonymisation est un processus consistant à masquer de manière irréversible les données originales 
+			2 - La pseudo-anonymisation visent à substituer un élément de données sensibles par un pseudonyme
+			3- La tokenisation est un renforcement de la pseudo-anonymisation qui impose l’attribution d’une
+				nouvelle valeur aléatoire, appelé jeton, à chaque utilisation de la donnée d’origine. Cette
+				méthode rend impossible la corrélation des données.
+
+**************************************************************
+**************************************************************
+**************************************************************
+pages 92 -- 93 -- 94  -- 95 
+
+**************************************************************
+**************************************************************
+**************************************************************
+LES PRINCIPAUX COMPOSANTS
+capacité de calcule:
+réseau: Un Cloud privé virtuel (VPC) est un type de Cloud permettant de fournir (via un fiwerall)
+stockage:
+sécurité
+
+
+**************************************************************
+**************************************************************
+**************************************************************
+
+
+
+**************************************************************
+**************************************************************
+**************************************************************
+
+
+
+
+**************************************************************
+**************************************************************
+**************************************************************
+Type de Cloud:
+--------------
+
+cloud privé: la limite les ressource et les moyens que l'entrepse va mettre à sa disposition (volonté de l'entreprise)
+hybrideil dispose des ressources dédiées en en interne et en externe dans le but de répondre par ecxemple à un pique de charge ponctuel)
+
+
+
+
+*
+*
+*
+*
+*
+*
+*
+
+*
+*
+*
+*
+*
+*
+*
+*
+
+*
+**
+*
+**
+*
+Ils Croient Fermement Aux Gens
+
+Les gens sont attirés par les fortes personnalités et les Protagonistes dégagent authenticité, préoccupation et altruisme. Ils n’ont pas peur de se lever et de prendre la parole quand ils sentent qu’il y a une chose qu’il faut dire. Ils trouvent naturel et facile de communiquer avec les autres, surtout directement, et leur intuition aide les gens de personnalité « Protagoniste » à toucher tous les esprits, que ce soit par l’intermédiaire des faits et de la logique ou de l’émotion pure. Les Protagonistes repèrent facilement les motivations des gens et les évènements en apparence déconnectés, et sont capables de rassembler ces idées et de les communiquer en tant que but commun avec une éloquence tout simplement fascinante.
+
+L’intérêt des Protagonistes pour autrui est authentique, presque à l’excès : quand ils croient en quelqu’un, ils peuvent s’impliquer à l’excès dans les problèmes de l’autre personne, leur accorder trop de confiance. Heureusement, cette confiance a tendance à être une prophétie auto réalisatrice, car l’altruisme et l’authenticité des Protagonistes pousse ceux dont ils s’occupent à s’améliorer. Cependant, s’ils ne font pas attention, ils peuvent être excessivement optimistes et parfois pousser les autres plus loin qu’ils ne sont prêts à aller ou qu’ils ne le désirent.
+
+Les Protagonistes sont aussi vulnérables à un autre piège : ils ont une énorme capacité de réflexion sur et d’analyse de leurs propres sentiments, mais s’ils s’impliquent trop dans la situation critique d’une autre personne, ils peuvent souffrir d’une sorte d’hypocondrie émotionnelle, voir les problèmes des autres chez eux-mêmes, essayer de réparer chez eux-mêmes une chose qui fonctionne bien. S’ils en arrivent au point où ils sont bloqués par des limites ressenties par quelqu’un d’autre, cela peut contrarier la capacité des Protagonistes à voir au-delà du dilemme et à être tout simplement efficace. Quand cela se produit, il est important que les Protagonistes fassent marche arrière et utilisent cette réflexion sur eux-mêmes pour faire la distinction entre ce qu’ils ressentent vraiment et ce qui constitue un problème séparé qu’il faut aborder d’un autre point de vue.
+... La Lutte Ne Devrait Pas Nous Décourager De Soutenir Une Cause Que Nous Considérons Comme Juste
+
+    Les Protagonistes sont des personnes authentiques et attentionnées qui sont convaincantes et montrent de quoi elles sont capables, et rien ne les rend plus heureuses que mener la lutte, unir et motiver leur équipe avec un enthousiasme contagieux.
+
+Les gens de personnalité « Protagoniste » sont des altruistes passionnés, parfois même trop, et il est improbable qu’ils aient peur de prendre les armes pour défendre les gens et les idées en lesquels ils croient. Il n’y a rien d’étonnant à ce que beaucoup des Protagonistes célèbres soient Présidents des USA car ce type de personnalité veut montrer la voie vers un avenir plus brillant, que ce soit en menant une nation à la prospérité ou en apportant une victoire âprement disputée à leur petite équipe de championnat de softball.

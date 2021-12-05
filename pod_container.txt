@@ -1,0 +1,168 @@
+
+ck cks 
+
+dns, debug pod : https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/
+
+
+POD   TO DO https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/
+Les éléments d'un pod sont toujours co-localisés et co-ordonnancés, et s'exécutent dans un contexte partagé. 
+
+-------------------------------------------------
+template:  for your pod’s object definition. This template will define specifications to create the pod from
+
+---------------------------------------------
+To create the service, you will create an object definition file. Every Kubernetes object definition is a YAML file that contains at least the following items:
+
+    apiVersion:   The version of the Kubernetes API that the definition belongs to.
+    kind:         The Kubernetes object this file represents. For example, a pod or service.
+    metadata:     This contains the name of the object along with any labels that you may wish to apply to it.
+    spec:         This contains a specific configuration depending on the kind of object you are creating, such as the container image or the ports on which the container will be accessible from.
+
+
+---------------------
+
+How a Kubernetes Pod Gets an IP Address:
+https://ronaknathani.com/blog/2020/08/how-a-kubernetes-pod-gets-an-ip-address/
+
+------------------------------------------
+# Create multiple YAML objects from stdin EOF
+https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+----------------------------------------
+
+Volume dans les POD:
+********************
+https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/
+----------------------------------------
+
+the ip adresse of POD:
+**********************
+kubectl get nodes:
+desktop-parxemple  <--- my name node
+kubectl get no <nodeName> -o json | jq '.spec.podCIDR'
+----------------------------------------
+
+connect to pod:
+***************
+
+alias kubectl='winpty kubectl'
+$ kubectl exec -it <ne lom du POD complet ..-...-..> -- sh
+$ kubectl exec -it nginx-deployment-59d8745688-ztwmc  -- sh
+----------------------------------------
+
+Delete:
+*******
+kb delete service "nom-service"
+kb delete pod "nom du pod"
+---------------------------------------
+
+conteneurs init:
+***************
+Cela dit, vous avez la possibilité d’utiliser des conteneurs Init, qui s’exécutent 
+avant les conteneurs d’application. De plus, ils s’exécutent dans l’ordre que vous spécifiez. Par exemple, considérez cet exemple tiré des documents officiels :
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+  initContainers:
+  - name: init-myservice
+    image: busybox:1.28
+  - name: init-mydb
+    image: busybox:1.28
+
+Dans ce cas, Kubernetes exécute init-myservice jusqu’à ce qu’il réussisse, puis init-mydb, puis l’application myapp-container. Vous pouvez utiliser les 
+conteneurs Init pour vous assurer que tous les travaux de base dont vos conteneurs d’application ont besoin ont été posés.
+
+----------------------------------------------------
+Communication réseau entre conteneurs
+
+
+
+------------------------------------------------------
+delete POD 
+**********
+kb delete -f file.yaml
+
+------------------------------------------------------
+
+Expose the Pod using the NodePort service:
+$ kubectl expose pod mc3 --type=NodePort --port=80
+service "mc3" exposed
+
+----------------------------------------------------
+Step 4. Identify port on the node that is forwarded to the Pod:
+$ kubectl describe service mc3
+...
+NodePort:	<unset>	31418/TCP
+
+
+C:\Users\nassim.chetouani\AppData\Local\Programs\Microsoft VS Code
+ kb rollout restart deployement nginx-deployment --namespace=namesp-dev
+
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config-file-one
+        - name: bdd-secret
+          secret:
+            secretName: nginx-secret-file-one
+--------------------------------------------------------  
+Debog POD:
+Describe:
+***********
+ kubectl describe pods nginx-deployment-db97f5c75-6hwk2 --namespace=namesp-dev
+https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/
+-----------------------------
+
+Échec de l’espace CrashLoopBackOff
+https://managedkube.com/kubernetes/pod/failure/crashloopbackoff/k8sbot/troubleshooting/2019/02/12/pod-failure-crashloopbackoff.html
+
+--------------------------------------------------
+
+log:
+$ kubectl logs nginx-deployment-5bc59fcc79-nrfq8 -c webbpp --namespace=namesp-dev
+
+-----------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: bb-entrypoint
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    bb: web
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30001
+
+
+
+-------------------------------
+docker.io/library/nginx:latest
+
+vagrant@kubemaster:~/devops/Devops/20210920_formation_devops_online/Ingress/Ingress-LB-nginx$ docker pull nginx
+Using default tag: latest
+latest: Pulling from library/nginx
+a330b6cecb98: Pull complete
+e0ad2c0621bc: Pull complete
+9e56c3e0e6b7: Pull complete
+09f31c94adc6: Pull complete
+32b26e9cdb83: Pull complete
+20ab512bbb07: Pull complete
+Digest: sha256:853b221d3341add7aaadf5f81dd088ea943ab9c918766e295321294b035f3f3e
+Status: Downloaded newer image for nginx:latest
+docker.io/library/nginx:latest
+
+
+
+
+
+
+
+
+
+
+
+
+

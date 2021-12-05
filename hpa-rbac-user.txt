@@ -1,0 +1,218 @@
+hpa - rbac - user - sa
+
+hpa: 
+Horizontal pod autoscaler:
+
+il peut grandir et retricir fonction de __replicas__ en fonction de la charge d'une *__metric__* 
+et de definir une loi des comportement a adapter en fonction de scale down ou up, en laissant du 
+de temp en cas ou pour eviter un scale down très brutale  
+on definit un max et min pour les replicats
+
+automatique horizontale des pods ne s’applique pas aux objets qui ne peuvent pas être mis à l’échelle, par exemple, DaemonSets.
+
+L’Horizontal Pod Autoscaler est implémenté en tant que ressource API Kubernetes et contrôleur. La ressource détermine le comportement du contrôleur. 
+Le contrôleur ajuste périodiquement le nombre de réplicas dans un contrôleur de réplication ou un déploiement pour qu’il corresponde aux mesures observées
+ telles que
+l’utilisation moyenne du processeur, l’utilisation moyenne de la mémoire ou toute autre mesure personnalisée à la cible spécifiée par l’utilisateur.
+
+Comment fonctionne l’Horizontal Pod Autoscaler ?
+
+L’Horizontal Pod Autoscaler est implémenté comme une boucle de contrôle, avec une période contrôlée par l’indicateur du gestionnaire du contrôleur
+ (avec une valeur par défaut de 15 secondes). --horizontal-pod-autoscaler-sync-period
+ 
+ Au cours de chaque période, le gestionnaire de contrôleur interroge l’utilisation des ressources par rapport aux mesures spécifiées dans chaque définition
+ HorizontalPodAutoscaler. Le gestionnaire de contrôleur obtient les métriques 
+ à partir de l’API des métriques de ressources (pour les métriques de ressources par pod) ou de l’API de métriques personnalisées (pour toutes les autres métriques).
+ 
+ Stratégies de mise à l’échelle 
+
+ behavior:
+  scaleDown:
+    policies:
+    - type: Pods
+      value: 4
+      periodSeconds: 60
+    - type: Percent
+      value: 10
+      periodSeconds: 60
+	  
+	 
+La première stratégie (Pods) permet de réduire au maximum 4 réplicas en une minute. 
+La deuxième stratégie (Pourcentage) permet de réduire au maximum 10 % des réplicas actuels en une minute.
+
+Étant donné que, par défaut, la stratégie qui autorise le plus grand nombre de modifications est sélectionnée, la deuxième stratégie ne sera utilisée 
+que lorsque le nombre de réplicas d’espace est supérieur à 40. Avec 40 réplicas ou moins, la première stratégie sera appliquée. Par exemple, 
+s’il y a 80 réplicas et que la cible doit être réduite à 10 réplicas, au cours de la première étape, 8 réplicas seront réduits. Dans l’itération suivante, 
+lorsque le nombre de répliques est de 72, 10 % des pods est de 7,2 mais le nombre est arrondi à 8. Sur chaque boucle du contrôleur autoscaler, 
+le nombre de pods à modifier est recalculé en fonction du nombre de réplicas actuels. 
+Lorsque le nombre de réplicas tombe en dessous de 40, la première stratégie (Pods) est appliquée et 4 réplicas sont réduits à la fois.
+
+Apply Vs Create
+The difference between “apply” and “create” is that “create” will create the object if it doesn’t exist and do nothing else. 
+But if we “apply” a yaml file it means that it will create the object if it doesn’t exist and update it if needed.
+
+
+We have created users inside Kubernetes cluster using X.509 client certificate with OpenSSL and granting them authorizations. You can use the script available on my Github repository in order to create users easily. As for the cluster administration, you can use the open-source projects that have been introduced in this article. To sum up those projects:
+
+    kubectl auth can-i: know if a user can perform a specific action
+    rakkess: know all the actions that a user can perform
+    kubectl-who-can: know who are the users that can perform a specific action
+    rbac-lookup: get a RBAC overview
+    RBAC Manager: get simpler configuration that groups bindings together, 
+
+
+
+------------------------------
+
+secret et le sa:
+ligne 1643
+ou se trouve mon secret ?
+on fait le describe sur un POD ( on va voir le MOUNT et le chamin proposé par le mount:)
+
+dans le sa.yaml, rajouter la ligne d'après
+AutomountServiceAccountToken: true
+
+kubectl exec -ti myPOD -- /bin/bash
+ls /var/ .................... par exemple 
+token + ca.crt + namespace
+ca permet un acces a l'api kube grace a serviceaccount
+- ca va etre utilisé pour nos CI CS
+
+------------------------------
+kubectl:
+il utilise le kube.config
+méthod de hots : clé ca.crt et  .key ( ./kube/config) + authority data , les 3 pour se connecter 
+https 192.198.x.x:6443
+quand on 'est à l'extérieur du POD on a pas le résolution https://kubernetes/api (spécifique en interne par exp dans un POD)
+mais tu as bien acces l'acces à l'adress interne https://192.168.x.x:6443
+
+------------------------------
+
+TOKEN:
+à l'interieur du POD, dans l'exec -ti .....
+je install curl:
+apt update
+apk add curl
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)            --/ # TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+curl -H "Authorization: Bearer $TOKEN" https://kubernetes/api --insecure    --                / 
+
+
+  curl -H "Authorization: Bearer $TOKEN" https://kubernetes/api --insecure
+curl "-H Authorization: Bearer $TOKEN" https://kubernetes/api/v1/namespace/default(my-name-space)/pods --insecure  ( sur tout le cluster)
+
+curl "-H Authorization: Bearer $TOKEN" https://kubernetes/api/v1/secrets --insecure 
+
+curl "-H Authorization: Bearer $TOKEN" https://kubernetes/api/v1/services --insecure  (dans notre cas ça n'a pas marché faut voir le role)
+
+***   
+ name: pod-reader
+  namespace: default
+rules:  - apiGroups: [""]    resources: ["pods"]    verbs: ["get", "watch", "list"]
+***
+name: secret-reader
+rules:  - apiGroups: [""]   resources: ["secrets"] verbs: ["get", "watch", "list"]
+*****
+metadata:
+  name: pod-reader-binding    namespace: default
+subjects:
+  - kind: ServiceAccount     name: my-service-acc     namespace: default
+roleRef:
+  kind: Role    name: pod-reader   apiGroup: "rbac.authorization.k8s.io"
+***
+apiVersion: rbac.authorization.k8s.io/v1  
+kind: RoleBinding
+metadata:     name: read-secrets  subjects:
+- kind: ServiceAccount    name: my-service-acc
+  namespace: default  roleRef:    kind: ClusterRole    name: secret-reader    apiGroup: rbac.authorization.k8s.io
+*****
+metadata:
+  name: read-secrets-global
+subjects:
+- kind: ServiceAccount
+  name: my-service-acc
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+-------------------------------
+
+CI-DC
+Rolling update:
+si je build une nouvelle image sur gitLAb, 
+il va voir que la date à changer 
+quand il ya  merge sur master puis le push sur masterquadn la date a changer il retrigger un rolling update, gitter la nouvelle image car c'est un nouveau 
+H, et rebuilder (patcher les annocations, pour lancer un rolling update, meilleur simple façon c'est de changer un truc *useless* comme la date)
+il va rebuilder l'image avec ( en déclenchant l'api de kub et re déployer )
+
+
+--------------------------
+Scope Role
+role son scope c'est un namespace, tu ne peux pas l'appliquer  a tout le cluster, l'inf=verse est correct
+on peut reduire la taille du scope mais le agrandir   
+On ne peut appliquer le scope d'un role/namespace a tout le cluster 
+cluster on peut l'tutilsier et avec le cluster role binding et le role binding
+
+---------------------
+kubectl version --short
+
+kubectl get svc -n kube-system
+NAME                   TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE  
+kube-dns               ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP   10d  
+kubernetes-dashboard   ClusterIP   10.99.230.158    <none>        443/TCP         4d  
+-------
+
+CREATE  user 
+
+- 1 adduser jean
+- 2 cd /home/jean
+3 - sudo openssl genrsa -out jean.key 2048
+- 4) 138672909666048:error:2406F079:random number generator:RAND_load_file:Cannot open file:../crypto/rand/randfile.c:98:Filename=/home/vagrant/.rnd
+solution:  
+Try removing or commenting RANDFILE = $ENV::HOME/.rnd line in /etc/ssl/openssl.cnf  (work)
+- 5 sudo vi /etc/ssl ....
+- 6 # Without Group 
+openssl req -new -key jean.key \
+  -out jean.csr \
+  -subj "/CN=jean"
+
+# With a Group where $group is the group name
+openssl req -new -key jean.key \
+  -out jean.csr \
+  -subj "/CN=jean/O=$group"
+
+#If the user has multiple groups
+openssl req -new -key jean.key \
+  -out jean.csr \
+  -subj "/CN=jean/O=$group1/O=$group2/O=$group3"
+
+-7 : Sign the CSR with the Kubernetes CA. We have to use the CA cert and key which are normally in 
+  /etc/kubernetes/pki/. Our certificate will be valid for 500 days.
+- 8: vagrant@kubemaster:  /home/jean$ sudo openssl x509 -req -in jean.csr   -CA /etc/kubernetes/pki/ca.crt   -CAkey /etc/kubernetes/pki/ca.key   -CAcreateserial   -out jean.crt -days 500
+- 9: sudo mkdir .certs
+- 10: vagrant@kubemaster:/home/jean$ sudo mv jean.crt jean.key .certs
+- 11: Create the user inside Kubernetes.
+- /home/jean$ sudo kubectl config set-credentials jean   --client-certificate=/home/jean/.certs/jean.crt  
+                                                                                             --client-key=/home/jean/.certs/jean.key
+-12.1:  vagrant@kubemaster:/etc/kubernetes/pki$ sudo cp ca.crt /home/jean/.certs/
+- 12.2- vagrant@kubemaster:/etc/kubernetes/pki$ sudo kubectl --kubeconfig jean.kubeconfig config set-cluster kubernetes --server https://192.168.0.42:6443 --certificate-authority=/home/jean/.certs/ca.crt
+* --kubeconfig:  which config to use
+* config: option 
+* set-cluster : to create a new cluster ! or to use old cluster ! kubernetes
+
+- 13.1: Create a context for the user.
+- kubectl config set-context amir-context  --cluster=kubernetes --user=amir
+
+-13.1: create conetxte : methode 2 c'est un utre cobtext  amier-k...
+- vagrant@kubemaster:/home/jean$ sudo kubectl --kubeconfig amir.kubeconfig config set-context amir-kubernetes --cluster kubernetes
+
+
+-14  sudo kubectl --kubeconfig jean.kubeconfig config set-credentials jean --client-certificate=/home/jean/.certs/jean.crt --client-key=/home/jean/.certs/jean.key
+vagrant@kubemaster:/home/jean$ ls /etc/kubernetes/
+admin.conf  controller-manager.conf  kubelet.conf  manifests  pki  scheduler.conf
+-14: 
+
+
+
+

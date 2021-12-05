@@ -1,0 +1,65 @@
+calico_formation oneline
+https://kurtzemann.fr/tags/kubeadm/
+
+
+egress:
+*******
+An egress-only internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows outbound communication over IPv6
+       from instances in your VPC to the internet, and prevents the internet from initiating an IPv6 connection with your instances.
+Egress-only Internet gateway works as a NAT gateway, but for IPv6 traffic.
+
+Calico:
+*******
+calilco nous permet de choisir une plage ip disponible pour nos nodes 
+gestionnaire de network de pod, gere la comminication entrre vos nodes/podes
+il gere le kube-proxy
+
+
+widelist (waitlister exp pour bdd +egress et NAT):
+
+
+kublet:
+agent qui assure que les pods fonctionne bien 
+shceduler 
+il maintient les endpoint 
+
+il creer un service acount (cle token ... )
+
+proxy:
+toute application qui parle a l'éxtérieur elle passe par le proxy ou par un NAT!
+il autorise les communication 
+container runtime: auj on utlise docker 
+
+ExternalName:
+**************
+une bdd a une ExternalIp no pas une ExternalName
+namepace est un cluster virtual 
+j'ai 2 namespace = 2 cluster virtuals, si mes deux appli vont se communiquer entre elles , elles utilsent le service  svc+local
+il realsie un dns  svc.local
+soit utiliser un dns ou un service ( nom du service + nom du name space + svc + local ) , fini les adresse ip
+si un POD mort il va changer de ip
+
+cluster un redis:
+*****************
+legacy code, migre votre monolite
+
+NodePort:
+**********
+faut pas forcer avec le port du node laisse le optional Nodeport=30004 par exemple/ laisse pas s'initer par défaut
+
+
+namespace:
+**********
+on va gérer des ressource , des secret , des droit d'utilisateur .....
+par exemple pour deployer des application juste front et back pas de bdd ( selon la configaration)
+par exemple un namespace pour un produit comme OPRO, OCOM 
+
+Mise à jour:
+************
+pour mettre à jour Kubernetes par exp si je suis sur 1.7 et je veux passer a 2.0 , il faut passer par 1.8 et 1.9 bien avant
+
+
+
+LimitRange:
+***********
+403 faild si on viole l'api de kub (faut depasser els limites définiis dans le limit Range)

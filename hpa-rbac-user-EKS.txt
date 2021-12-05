@@ -1,0 +1,126 @@
+EKS --- hpa - rbac - user
+
+
+------------------------------
+root user: 
+add user in Docker run 
+https://snyk.io/blog/10-kubernetes-security-context-settings-you-should-understand/
+------------------------------
+
+Kubernetes Prometheus Monitoring: Metrics, Scrape and Installation with Helm
+https://k21academy.com/docker-kubernetes/prometheus-grafana-monitoring/
+--------------------------------
+EKS:
+auto scaling group: utiliser pour créer de nouvelle VM qui vont faire tourner notre hpa par exemple ( si on a utiliser la totlaisté de nos pods cpu par exemple"
+il dispose d'un min et ax de Vm a démmarer en cas de besoin 
+Si on disoise de 20 replicas et que chaque replicas a besoin de 500m cu et que notre node a seulement 2vCPU, ici intervient le EKS, et créer les VM nécessaires
+par défaut le scale up c'est 10 s : pour creer une nouvelle machine VM et 
+et le scale down c'est 10 minutes pour éteindre une VM selon le temps de sa création, de son démarrage  
+et cela une fois on killer , delete nos pods par exemple 
+
+faut voir l'installation: https://www.youtube.com/watch?v=lMb6wzy0PPA
+
+
+hpa: 
+Horizontal pod autoscaler:
+****************************
+
+---------------------------------------------
+youtube jolie excplication : https://www.youtube.com/watch?v=3BnrXapY7zo   
+ php image + scale down and down )
+
+------------------------
+il peut grandir et retricir fonction de __replicas__ en fonction de la charge d'une *__metric__* 
+et de definir une loi des comportement a adapter en fonction de scale down ou up, en laissant du 
+de temp en cas ou pour eviter un scale down très brutale  
+on definit un max et min pour les replicats
+
+automatique horizontale des pods ne s’applique pas aux objets qui ne peuvent pas être mis à l’échelle, par exemple, DaemonSets.
+
+L’Horizontal Pod Autoscaler est implémenté en tant que ressource API Kubernetes et contrôleur. La ressource détermine le comportement du contrôleur. 
+Le contrôleur ajuste périodiquement le nombre de réplicas dans un contrôleur de réplication ou un déploiement pour qu’il corresponde aux mesures observées
+ telles que
+l’utilisation moyenne du processeur, l’utilisation moyenne de la mémoire ou toute autre mesure personnalisée à la cible spécifiée par l’utilisateur.
+
+Comment fonctionne l’Horizontal Pod Autoscaler ?
+
+L’Horizontal Pod Autoscaler est implémenté comme une boucle de contrôle, avec une période contrôlée par l’indicateur du gestionnaire du contrôleur
+ (avec une valeur par défaut de 15 secondes). --horizontal-pod-autoscaler-sync-period
+ 
+ Au cours de chaque période, le gestionnaire de contrôleur interroge l’utilisation des ressources par rapport aux mesures spécifiées dans chaque définition
+ HorizontalPodAutoscaler. Le gestionnaire de contrôleur obtient les métriques 
+ à partir de l’API des métriques de ressources (pour les métriques de ressources par pod) ou de l’API de métriques personnalisées (pour toutes les autres métriques).
+ 
+ Stratégies de mise à l’échelle 
+
+ behavior:
+  scaleDown:
+    policies:
+    - type: Pods
+      value: 4
+      periodSeconds: 60
+    - type: Percent
+      value: 10
+      periodSeconds: 60
+	  
+	 
+La première stratégie (Pods) permet de réduire au maximum 4 réplicas en une minute. 
+La deuxième stratégie (Pourcentage) permet de réduire au maximum 10 % des réplicas actuels en une minute.
+
+Étant donné que, par défaut, la stratégie qui autorise le plus grand nombre de modifications est sélectionnée, la deuxième stratégie ne sera utilisée 
+que lorsque le nombre de réplicas d’espace est supérieur à 40. Avec 40 réplicas ou moins, la première stratégie sera appliquée. Par exemple, 
+s’il y a 80 réplicas et que la cible doit être réduite à 10 réplicas, au cours de la première étape, 8 réplicas seront réduits. Dans l’itération suivante, 
+lorsque le nombre de répliques est de 72, 10 % des pods est de 7,2 mais le nombre est arrondi à 8. Sur chaque boucle du contrôleur autoscaler, 
+le nombre de pods à modifier est recalculé en fonction du nombre de réplicas actuels. 
+Lorsque le nombre de réplicas tombe en dessous de 40, la première stratégie (Pods) est appliquée et 4 réplicas sont réduits à la fois.
+
+---------------
+
+Création des certificats
+https://blog.wescale.fr/2018/12/13/tutoriel-ajouter-un-user-dans-kubernetes-avec-cfssl/
+
+--------------
+
+
+rbac:
+
+https://www.adaltas.com/fr/2019/08/07/utilisateurs-rbac-kubernetes/
+tp -->> de walid   Utilisateurs et autorisations RBAC dans Kubernetes
+---------------------
+
+
+How to create and Manage user accounts in Kubernetes Cluster
+kubenretes certificat check: location , l'endroit des certificats:  https://www.youtube.com/watch?v=_vVdSaPi7e0
+key, crt: --->>  ls -lrt /etc/kubernetes/pki
+au nieav master : ..../pki
+ca.crt :  certificat de CA 
+ca.key: la clé prive des authorite de certification
+
+****
+
+command github https://github.com/justmeandopensource/kubernetes/blob/master/docs/create-user-certificates.md
+see https://www.youtube.com/watch?v=U67OwM-e9rQ
+exemple i creat a user JOHN , and I will give him access to a namesace not to all cluster:
+- John will get access only in namespace Finance
+- 1 create a pricate key for John 
+- namespace: default - Finance -Kube-System
+-2 binding a ROLE  to Groupe  (each users in this groupe will get acces to namespace Finance)
+- kubectl create namespace Fiannce 
+- 3 key pair to geenrate key for JOHN
+- openssl genrsa -out john.key 2048 ---> jhon.key : rsa key
+- 4 create a certificat signed request:
+- définition:
+- $ openssl req -new -key john.key -out john.csr -subj "/CN=john/O=finance"
+-
+-
+-
+-
+- copy: vagrant@kubemaster:~/.kube$ cat config
+- another to create: cp ~/.kube/config jhon.kubeconfig
+- wrap the ligne of certifact exemple : cat john.crt | base64  -w0  + =john.key | base 64 -wo
+- + other change
+- k create role mon-role  --verbe=get, list  --ressource=pods  --namespace finance 
+- k -n finance get role mon-role -o yaml
+-
+-
+-

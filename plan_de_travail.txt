@@ -1,0 +1,120 @@
+
+Abstract:
+
+Les points vus théoriquement et à revoir en pratique sur Kubernetes:
+pour le rappel sur els notions de docker on a pu revoir tout ce qu'a une relation avec docker, docker-compose et Dockerfile.
+dans ce rappel on a évoqué les points suivants:
+- volume/stockage
+- Interactive terminal
+- Mappage de port
+- Réseaux:
+- Déployer de serveur tel que nginx, bdd comme postgre, ...
+Il reste à voir les logs
+
+Sur minikube:
+---------
+pour la création de cluster (1 node )sur des VMs, dashboard ... 
+
+Les points vus sur kubernetes (théoriquement) jusqu'à présent:
+- Création de cluster (master + nodes)
+- Replicatset: l'utilité d'utilisation les replicatset lors du déploiement
+- Édition: le rôle de l'option 'edit' sur le re-déploiement des services
+- Déploiement: gérer le déploiement, les serviceIP, LoadBalancer, Ingress, CM configMap, Secret ...
+- Namespace: soit celui par défaut, soit créer un selon le besoin pour la séparation des domaines de travail  
+- Volumes: les type de volumes 'persistant volume' et 'persistant volume claim', comment sont utilisés
+- Stockage: cloud provider, nfs et local storage 
+- CM: utilisation des configMap pour renseigner les éléments ou valeurs changeables, sans nécessité d'écraser les services  
+- Secret: pour stocker les secrets comme ceux de la (bdd user et mdp) 
+- Persistance et consensus
+- Comment faire appel à Secret à partir d'un service/ ConfigMAp
+- Notion des plages IPs/POD et Port 
+- Inetractive terminal:
+- kubectl ( logs, describe ...) 
+
+Au niveau du control Plane:
+- etcd: qu'est une 'bdd' orientée clé-valeur, qu'est 'distribuée' persistante, conçu pour être résiliente aux pannes 'consensus'  
+- kube-controller-manager:
+- kube-scheduler: logiciel agent logistique
+- La notion de: scale DOWN et scale UP
+- DNS: (exp de un nom DNS: prod.namespace.svc.cluster.local) 
+- LA Notion de: Horizontal AUTOSCALING
+- Labels
+- Sélecteur
+***********************************************************************
+***********************************************************************
+***********************************************************************
+***********************************************************************
+***********************************************************************
+***********************************************************************
+
+Bonjour M. Mia,
+Veuillez trouver ci-joint notre plan de travail sur lequel Nassim sera amené à travailler 
+Voici le programme en détail 
+
+ADMINISTRATION DE KUBERNETES EN PRODUCTION:
+- Configuration avancée de kubeadm
+- Mise en place automatisée d’un cluster Kubernetes On-Premise
+- Sécurisation d’un cluster Kubernetes On-Premise pour la production
+- Mise en place de la haute disponibilité pour le Control-Plane
+- Mise à jour automatisée en mode Rolling Update du Control-Plane et des noeuds Kubernetes
+- Virtuosité dans l’utilisation de kubectl pour la CKAD
+- Intégration continue dans le Cloud avec kind
+- CRI: crictl, Docker et Containerd
+
+
+ARCHITECTURE DE KUBERNETES:
+- Les composants du Control Plane et des noeuds de travail:
+- Philosophie Unix des composants
+- Fonctionnement de la boucle de réconciliation et du Controller Kubernetes
+- Fonctionnement de etcd en mode haute-disponibilité
+- Fonctionnement interne de l’API server: authentification, autorisation et Admission Control
+- Gestion des contrôleurs d’admission
+- Extension du cycle de vie du serveur d’API avec les MutatingAdmissionWebhook et les ValidatingAdmissionWebhook
+- Description de l’algorithme du Scheduler Kubernetes, prédicats et priorités
+- Configuration déclarative
+- Groupement implicite ou dynamique
+- Interactions pilotées par les API
+- Cinématique de création d’un Pod à partir d’un Deployment
+- Kube-proxy: fonctionnement avancé du réseau virtuel des Services
+- Service discovery avec CoreDNS
+- Description de la structure interne d’un Pod et du conteneur d’infrastructure
+
+
+GESTION DES UTILISATEURS ET DROITS D’ACCÈS:
+- Authentification: certificats, tokens, et Dex
+- Paramétrage du fichier Kubeconfig avec les Configuration Contexts
+- Gestion des ServiceAccounts
+- Sécuriser le pilotage du cluster avec les autorisations RBAC
+- Role et ClusterRole, RoleBinding et ClusterRoleBinding
+- Création de RBAC simples et génériques pour piloter un cluster de production
+
+
+SÉCURITÉ:
+- Sécuriser l’exécution des processus Unix dans les Pods
+- SecurityContext: Mode privileged, Linux Capabilities, sécurisation des processus Unix
+- Industrialiser la sécurité des Pods avec les PodSecurityPolicies
+- Choix d’un plug-in réseau CNI sécurisé et performant
+- Industrialiser la sécurité du réseau (L4) avec les NetworkPolicies (ingress et egress)
+
+
+QUALITÉ DE SERVICE:
+- Utilisation optimale des ressources matérielles grâce aux Requests et Limits
+- Classes de QoS: Guaranteed, Burstable et BestEffort
+- Contrôle d’allocation des ressources par Namespace avec les ResourceQuota
+- Contrôle d’allocation des ressources par Pod avec les LimitRange
+
+
+OPTIMISATION DU SCHEDULER:
+- Contrôle de la planification avec les Labels et les Affinités
+- NodeSelector, NodeAffinity, PodAffinity, PodAntiAffinity
+- Taints and Tolerations
+
+
+MONITORING:
+- Objectifs de surveillance et de journalisation
+- Automatiser le monitoring avec l’opérateur Prometheus
+- Obtenir et agréger les métriques de votre cluster et de vos applications
+- AlertManager: gestion et routage des alertes
+- Visualiser et interagir avec vos données avec Grafana
+
+Merci à toi et bonne soirée !

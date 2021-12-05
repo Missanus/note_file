@@ -1,0 +1,48 @@
+kublet , kueadm : lien installtion kubernrtes:
+https://kurtzemann.fr/tags/kubeadm/
+
+caluco, cilium
+https://kurtzemann.fr/2021/02/kubernetes-jadministre-mon-cluster-2-mise-en-place-du-plugin-cni/
+
+user-context et context: 
+https://kubernetes.io/fr/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+
+
+
+Static pods
+Les pods ayant comme suffixe -k8s-m01 sont des Static Pods4.
+
+En effet, il est possible de définir des pods locaux à un noeud. Ces derniers sont gérés par le kubelet et non par l’API Kubernetes.
+
+Dans la configuration du kubelet le paramètre staticPodPath indique le dossier contenant les manifestes des Static Pods.
+
+$ grep staticPodPath /var/lib/kubelet/config.yaml
+staticPodPath: /etc/kubernetes/manifests
+Dans ce dossier on retrouve bien 4 fichiers correspondants aux pods ayant le suffixe -k8s-m01
+
+$ ls -l /etc/kubernetes/manifests/
+
+-rw------- 1 root root 2081 Dec  9 11:58 etcd.yaml
+-rw------- 1 root root 3808 Dec  9 11:58 kube-apiserver.yaml
+-rw------- 1 root root 3350 Dec  9 11:58 kube-controller-manager.yaml
+-rw------- 1 root root 1384 Dec  9 11:58 kube-scheduler.yaml
+Les Static Pods sont :
+
+listés par kubectl
+suffixés par le nom d’hôte où ils sont exécutés
+Mais il sera impossible d’effectuer une action sur eux via l’API de Kubernetes
+
+les Admissions Controllers n’auront donc aucuns effets sur ces derniers, car ils sont initiés avant par le kubelet
+essayez un kubectl delete sur un Static Pod 😉
+
+
+
+
+
+Kubeadm, kubelet et kubectl
+L’étape suivante est d’installer kubeadm, kubelet et kubectl.
+
+Ces 2 derniers seront respectivement utilisés
+
+pour gérer les pods des composants formant le control-plane
+pour communiquer avec votre cluster Kubernetes

@@ -1,0 +1,81 @@
+
+https://ichi.pro/fr/sauvegarde-et-restauration-du-cluster-kubernetes-a-l-aide-de-l-outil-etcdctl-58837143038846
+
+etc
+etcd est un magasin de valeurs-clés distribué et fiable pour les données les plus critiques d'un système distribué. etcd est un magasin 
+de valeurs de clés cohérent et hautement disponible utilisé comme magasin de sauvegarde de Kubernetes pour toutes les données de cluster.
+etcdctl, un outil en ligne de commande pour interagir avec le serveur etcd.
+
+
+Installez l'outil etcdctl:
+
+#!/bin/bash
+(
+ETCD_VERSION=${ETCD_VERSION:-v3.3.1}
+
+curl -L https://github.com/coreos/etcd/releases/download/$ETCD_VERSION/etcd-$ETCD_VERSION-linux-amd64.tar.gz -o etcd-$ETCD_VERSION-linux-amd64.tar.gz
+
+tar xzvf etcd-$ETCD_VERSION-linux-amd64.tar.gz
+rm etcd-$ETCD_VERSION-linux-amd64.tar.gz
+
+cd etcd-$ETCD_VERSION-linux-amd64
+sudo cp etcd /usr/local/bin/
+sudo cp etcdctl /usr/local/bin/
+
+rm -rf etcd-$ETCD_VERSION-linux-amd64
+
+etcdctl --version
+)
+
+
+Sauvegarde du cluster:
+// Do not forget to mention etcd API version 3
+ETCDCTL_API=3 etcdctl \
+--endpoints  https://192.168.0.45:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key \
+snapshot save /tmp/snapshot-backup.db
+
+
+
+
+
+Restaurer le cluster:
+ETCDCTL_API=3 etcdctl \
+--endpoints=https://192.168.0.45:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--name=kubemaster \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key \
+--data-dir /var/lib/etcd-backup \
+--initial-cluster=kubemaster=https://192.168.0.45:2380 \
+--initial-cluster-token etcd-cluster-new \
+--initial-advertise-peer-urls=https://192.168.0.45:2380 \
+snapshot restore /tmp/snapshot-backup.db
+
+
+
+pec:
+  containers:
+  - command:
+    - etcd
+    - --advertise-client-urls=https://192.168.0.45:2379
+    - --cert-file=/etc/kubernetes/pki/etcd/server.crt
+    - --client-cert-auth=true
+    - --data-dir=/var/lib/etcd
+    - --initial-advertise-peer-urls=https://192.168.0.45:2380
+    - --initial-cluster=kubemaster=https://192.168.0.45:2380
+    - --key-file=/etc/kubernetes/pki/etcd/server.key
+    - --listen-client-urls=https://127.0.0.1:2379,https://192.168.0.45:2379
+    - --listen-metrics-urls=http://127.0.0.1:2381
+    - --listen-peer-urls=https://192.168.0.45:2380
+    - --name=kubemaster
+    - --peer-cert-file=/etc/kubernetes/pki/etcd/peer.crt
+    - --peer-client-cert-auth=true
+    - --peer-key-file=/etc/kubernetes/pki/etcd/peer.key
+    - --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+    - --snapshot-count=10000
+    - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+    image: k8s.gcr.io/etcd:3.5.0-0
+    imagePullPolicy: IfNotPresent

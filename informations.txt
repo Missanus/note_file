@@ -1,0 +1,141 @@
+
+
+microservices:
+--------------
+Les microservices désignent un type d'architecture où une application est développée sous la forme d’une collection de mini-services  
+
+Docker vs VM:
+-------------
+docker Containeur : No OS to boot
+virtualiser le hardware comme l’hyperviseur, le container virtualise le système d’exploitation.
+
+docker : Hyperviseur/baremetal/virrtualisation  +    OS +  docker engine                + [bin/libs + app] container  (il n ' y pas de hysperviseur )
+VM:     Hyperviseur/baremetal/virtualisation  HyperV +    OS + Hyperviseur/hebergé + guest OS virtualbox +  [bin/libs + app]            (stop hyperviseur se retouve avant l'OS de la VM
+ 
+
+conteneur + VM!:
+----------------
+ Les containers sont isolés, mais partagent le même système d’exploitation. De fait, 
+ une attaque ou une faille de sécurité sur l’OS peut compromettre tous les containers. 
+ Pour minimiser ce risque, certaines entreprises exécutent leurs containers au sein d’une machine virtuelle.
+ 
+docker -d:
+----------
+
+ L’astuce ici est que si vous n’utilisez pas l’option -d quand vous utilisez docker run ou docker-compose up vous verrez vos logs directement 
+ (mais vous aurez besoin d’arrêter le conteneur pour quitter la vue). 
+ 
+les alternatives docker:
+------------------------
+CoreOs rkt:  Cet outil profite du support de SELinux, ce qui le sécurise.
+Canonical LXD, ou encore Virtuozzo OpenVZ, la plus ancienne plateforme de container. 
+
+hyperviseur:
+------------
+En général, il existe deux types d'hyperviseurs : 
+L'hyperviseur de type 1, nommé « bare metal » s'exécute directement sur le matériel de l'hôte. 
+L'hyperviseur de type 2, nommé « hébergé » s'exécute sous forme d'une couche logicielle sur un ****système d'exploitation-****,
+ comme n'importe quel autre programme informatique.
+Un serveur bare-metal est un serveur d’ordinateur physique utilisé par un seul consommateur!
+
+bare metal:
+-----------
+Le terme bare metal fait référence au fait qu’il *** n’y a pas de système d’exploitation*** entre le logiciel de virtualisation et le matériel. 
+Le logiciel de virtualisation réside sur le « bare metal » __ou___ le disque dur du matériel, où le système d’exploitation est généralement installé. 
+Le bare metal n’est pas seulement utilisé pour décrire les hyperviseurs
+Un « ordinateur bare metal » est généralement un ordinateur sans aucun logiciel (OS ou applications).
+
+Type de hyperviseurs:
+---------------------
+exemples d’hyperviseurs bare-metal populaires sont Microsoft Hyper-V, Citrix XenServer et VMware ESXi.
+
+image:
+-----
+multiple layer + is a collection of files and metadatas + a layer is just also another images layer + every images contains à base layer + utilise une copie sur le système d'écriture
+
+image share layer:
+-----------------
+dans le cas j'ai sur ma host une image ubuntu, et si l'appli1 et l'appli2 utilise une image ubuntu donc elle sera partagée 
+pareils pour du java si ..., ils partgerent la même chouche 
+
+docker:
+-------
+client: installé sour windows / amd64
+server: installé sur linux/amd64 ( que linux qui support les conteneurs) donc c'est une VM, hyperviseur lancé
+
+etcd:
+-----
+
+only Api server in th e master can talk with etcd 1 or 2 or etc ...
+replicates:
+consitent
+highly available: 
+
+port-forward :
+Forward a local port to a port on the Pod  (service:pod/container)
+ --------------
+kubectl port-forward replicaset/mongo-75f59d57f4 28015:27017
+kubectl port-forward deployment/mongo 28015:27017
+kubectl get service mongo
+mongo   ClusterIP   10.96.41.183   <none>        27017/TCP   11s
+
+
+service mesh:
+-------------
+gère la communication entre les microservices, 
+we need a dedecated service what are the challeneges 
+
+pod communication:
+------------------
+there is a network bridge called cbr0, which facilitates the communication between pods in a node. All the pods are a part of this network bridge.
+
+matser node:
+------------
+ if a master fails, nodes continue to function properly, but the system looses its ability to manage pods
+
+master down:
+------------
+source: https://www.suse.com/c/kubernetes-cluster-vs-master-node/
+What happens when the master node goes down? Will the workload(s) and worker node(s) go down, too?
+…Does this mean we cannot have Kubernetes running with 99.99 availability?
+Also no. The solution to this is known as the High Availability Master Node solution.
+What is a High Availability Master Node solution?
+The objective of the solution is to always avoid orphaning worker/minion node(s) and workload(s) i.e. to always have a master taking care of them and managing them.
+
+Sollution:
+-----------
+Solution principles:
+
+    A cluster will have multiple master nodes.
+    Master nodes run in different availability zones
+    Only one master node is active and operating the whole set of worker node(s).
+    With only one node running as the active master node and the other master nodes running as inactive, on of the inactive nodes takes the lead in case the active node goes down.
+	
+
+	
+What is Master Node in Kubernetes:
+----------------------------------
+
+A master node is a node which controls and manages a set of worker nodes (workloads runtime) and resembles a cluster in Kubernetes. A master node has the following components to help manage worker nodes:
+    Kube-APIServer, which acts as the frontend to the cluster. All external communication to the cluster is via the API-Server.
+    Kube-Controller-Manager, which runs a set of controllers for the running cluster. The controller-manager implements governance across the cluster.
+    Etcd, the cluster state database.
+    Kube Scheduler, which schedules activities to the worker nodes based on events occurring on the etcd. It also holds the nodes resources plan to determine the proper action for the triggered event. For example the scheduler would figure out which worker node will host a newly scheduled POD.
+
+
+Learn how to use Kubernetes External IP service type:
+-------------------------------------------------------
+https://medium.com/swlh/kubernetes-external-ip-service-type-5e5e9ad62fcd
+ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  externalIPs:
+    - 1.2.4.120
+	***
+$ kubectl get svc
+NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+kubernetes      ClusterIP   10.43.0.1       <none>        443/TCP   18m
+httpd-service   ClusterIP   10.43.240.149   1.2.4.120     80/TCP    32s
+nginx-service   ClusterIP   10.43.13.149    1.2.4.114     80/TCP    26s

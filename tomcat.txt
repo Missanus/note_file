@@ -1,0 +1,9 @@
+tomcate:
+********
+
+Create Docker container with tomcat and webApp:
+https://www.youtube.com/watch?v=cIFoc8Q8l-0
+
+nginx 
+Simple NGINX with Docker for beginners
+https://www.youtube.com/watch?v=qxPdd-geqqA

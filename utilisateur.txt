@@ -1,0 +1,215 @@
+
+L'authentification par clé publique (clé SSH) est une alternative plus sécurisée à l'authentification par mot de passe qui permet aux utilisateurs d'éviter de saisir ou de stocker un mot de passe, 
+ou de l'envoyer sur le réseau. 
+L'authentification par clé publique utilise l'ordinateur client pour générer la paire de clés (une clé publique et une clé privée). 
+La clé publique est ensuite fournie à l'administrateur de l'ordinateur distant pour être installée sur cette machine.
+
+
+start:
+------
+vagrant@kubemaster:~/.ssh$ ls
+authorized_keys
+vagrant@kubemaster:~/.ssh$ cat authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwv1xBaxB0qqaeHtH7TYBSsDGEh4UF2Zdk40HUiPLN5rvWBZsgT6Az99CUPh+ZfFmhe6FQU8Xx+0OBs6H8SpWgWNzYX3j/figZL+uJbvoVDQATolT1VhxmDxKJZqdlPtOkEAO4sEEG3rA4KzNFPwkmp8Dkci1RbRUth1pMlc6/KfHQkziyk9cA8X6w839uj9Sxwapv+JkHAXF+clVL2qanIQZ32jNZ59cJONOJ20ULN9vnYgqeEitTMwOwH7AAe3c7T+VUwJzRJRxwogZ1i7auBjRLM7GgClZozowR5/gZ6HK7QUkTtRNWhszaQIvep1UF/Kdr/K8zSyr1WUDILh7/ vagrant
+vagrant@kubemaster:~/.ssh$ ls -la
+total 12
+drwx------ 2 vagrant vagrant 4096 Oct 10 11:14 .
+drwxr-xr-x 4 vagrant vagrant 4096 Oct 10 11:13 ..
+-rw------- 1 vagrant vagrant  389 Oct 10 11:14 authorized_keys
+vagrant@kubemaster:~/.ssh$
+
+verion:
+vagrant@kubemaster:~/.ssh$ cat /etc/*release
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=16.04
+DISTRIB_CODENAME=xenial
+DISTRIB_DESCRIPTION="Ubuntu 16.04.6 LTS"
+NAME="Ubuntu"
+VERSION="16.04.6 LTS (Xenial Xerus)"
+
+
+vagrant@kubemaster:~/.ssh$ lsb_release -d
+Description:    Ubuntu 16.04.6 LTS
+
+version of the Linux kernel:
+---------------------------
+vagrant@kubemaster:~$ uname -r
+4.15.0-99-generic
+
+- vagrant@kubemaster:/home$ sudo groupadd amir / nassim
+- root@kubemaster:/home# mkdir amir
+- root@kubemaster:/home/nassim# mkdir -p .ssh
+
+- root@kubemaster:/home/brouillon#  ssh-keygen -t rsa
+- Enter file in which to save the key (/root/.ssh/id_rsa): amir@rsa
+
+root@kubemaster:/home/brouillon# ls
+amir@rsa  amir@rsa.pub
+
+- root@kubemaster:/home/brouillon# cat nassim\@rsa.pub >> /home/nassim/.ssh/authorized_keys
+- root@kubemaster:/home# chmod 0700 /home/nassim/.ssh/       # just l'utilisateur  -groupe - all, instead 755 
+- root@kubemaster:/home# chmod 0600 /home/nassim/.ssh/authorized_keys   # pas le gourpe instead 644 
+- root@kubemaster:/home# chown -R nassim:nassim /home/nassim/.ssh/
+
+- root@kubemaster:/home# chown -R nassim:amir /home/amir/.ssh/
+
+- root@/home# echo "amir ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/amir
+
+- root@kubemaster:/home# chmod 440 /etc/sudoers.d/nassim
+- root@kubemaster:/home# chmod 440 /etc/sudoers.d/amir
+
+root@kubemaster:/home/nassim/.ssh# adduser amir
+- adduser: The group `amir' already exists.
+- ssh# useradd -g amir amir
+- mkdir -p amir et autre .......
+- root@/home# echo "amir ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/amir
+- /home# chmod 440 /etc/sudoers.d/amir
+
+- root@kubemasterM:/home# mkdir -p /home/nassim/.ssh
+- root@kubemasterM:/home/vagrant# touch /home/amir/.bashrc
+- root@kubemasterM:/home/vagrant# touch /home/nassim/.bashrc
+- root@kubemasterM:/home/vagrant# touch /home/nassim/.profile
+- root@kubemasterM:/home/vagrant# touch /home/amir/.profile
+
+- root@kubemasterM:/home/vagrant# cp /home/vagrant/.bashrc /home/nassim/.bashrc
+- root@kubemasterM:/home/vagrant# cp /home/vagrant/.bashrc /home/amir/.bashrc
+profile:
+--------
+- root@kubemasterM:/home/vagrant# cp /home/vagrant/.profile /home/amir/.profile
+- vagrant# cp /home/vagrant/.profile /home/nassim/.profile
+
+ssh:
+----
+root@kubemasterM:/home/vagrant# ssh-keygen -t rsa
+Enter file in which to save the key (/root/.ssh/id_rsa): /home/nassim/.ssh/nassim_id_rsa
+
+ssh:
+----
+(
+username=amir
+cat /home/"$username"/.ssh/"$username"_id_rsa.pub >> /home/"$username"/.ssh/authorized_keys
+chmod 0700 /home/"$username"/.ssh/ 
+chmod 0600 /home/"$username"/.ssh/authorized_keys 
+chown -R "$username":"$username" /home/"$username"/
+)
+
+
+***************************************************
+****************************************************
+mkdir -p /home/vagranti/.ssh
+root@kubemaster:/home# cp /home/brouillon/nassim@rsa /home/vagranti/.ssh
+cp /vagrant/nassim@rsa /home/vagranti/.ssh   11
+chmod 0700 /home/vagranti/.ssh
+chmod 0600 /home/vagranti/.ssh/nassim@rsa
+
+rm -f /home/vagranti/.ssh/config
+echo "Host server" > /home/vagranti/.ssh/config
+echo "  Hostname 192.168.50.10" >> /home/vagranti/.ssh/config
+echo "  Hostname 192.168.0.42" >> /home/vagranti/.ssh/config (voir ifconfig eth1)
+
+echo "  User vagranti" >> /home/vagranti/.ssh/config
+echo "  IdentityFile ~/.ssh/nassim@rsa" >> /home/vagranti/.ssh/config
+chmod 0600 /home/vagranti/.ssh/config
+chown -R vagranti:vagranti /home/vagranti/.ssh
+root@kubemaster:/home# chown -R nassim:vagranti /home/vagranti/.ssh
+su vagrant -c 'git config --global user.name "Glenn Y. Rolland"'
+su vagrant -c 'git config --global user.email "glenux@glenux.net"'
+
+****************************************
+******************************************
+
+
+Afficher les utilisateurs :
+---------------------------
+cat /etc/passwd | awk -F: '{print $1}'
+
+Afficher les groupes :
+-----------------------
+cat /etc/group | awk -F: '{print $1}'   
+
+******************************************
+*******************************************
+
+CPU and Meo memroy MASTER Node:
+-------------------------------
+error execution phase preflight: [preflight] Some fatal errors occurred:
+        [ERROR NumCPU]: the number of available CPUs 1 is less than the required 2
+        [ERROR Mem]: the system RAM (1355 MB) is less than the minimum 1700 MB
+
+root@kubemasterM:/home# cat /proc/cpuinfo
+cpu cores   : 4      1 cpu a 7 noyau coeur 
+processor   : 7 ( 7 coeur ) ( 7 processeur --- ) 
+****************************
+***************************************
+
+
+
+ kubectl version*
+   12  kubectl version
+   13  ls -la
+
+   17  sudo chown -R amir:amir /home/amir/.*
+
+   45  sudo cp config /etc/kubernetes/amir.conf
+   46  sudo chmod 777 /etc/kubernetes/amir.conf
+ 
+
+   84  sudo mkdir -p ../amir/.certs
+   85  sudo rm -f ../amir/.certs
+   86  sudo mkdir -p ../amir/.certs
+   87  cp -r . ../amir/.certs
+   88  sudo cp -r . ../amir/.certs
+   89  kubectl version
+   
+  124  cd .certs/
+  127  sudo chmod 0644 amir.key
+  128  kubectl version
+  
+  amir@kubemaster:~$ ls
+amir@kubemaster:~$ ls -la
+total 28
+drwxr-xr-x 6 amir amir 4096 Oct 10 19:35 .
+drwxr-xr-x 6 amir amir 4096 Oct 10 19:07 ..
+drwxr-xr-x 2 root root 4096 Oct 10 19:29 .certs
+drwxr-xr-x 3 amir amir 4096 Oct 10 19:37 .kube
+drwx------ 2 amir amir 4096 Oct 10 15:48 .ssh
+drwxr-xr-x 2 amir amir 4096 Oct 10 19:31 .vim
+-rw------- 1 amir amir 3733 Oct 10 19:35 .viminfo
+
+nassim@kubemaster:/home$ kubectl get pods
+error: error loading config file "/home/nassim/.kube/config": open /home/nassim/.kube/config: permission denied
+nassim@kubemaster:/home$ sudo chmod 0777 /home/nassim/.kube/config
+
+
+
+install kreaw:
+-------------- sudo su
+https://krew.sigs.k8s.io/docs/user-guide/setup/install/
+
+plugin:
+-------
+https://krew.sigs.k8s.io/plugins/
+nassim@kubemaster:~$ kubectl krew install access-matrix
+nassim@kubemaster:~$ kubectl access-matrix -n my-project-prod --as nassim
+
+
+
+amir@kubemaster:~$ kubectl run nginx --image=nginx --restart=Never --dry-run=client -n my-project-dev -o yaml > fpods/pod.yaml
+restartpolicy: Never: -- > Qu’est-ce que le redémarrage Never in Kubernetes ? Ceci est utile lorsque vous souhaitez accomplir une certaine tâche avec l’espace et vous assurer qu’il se termine correctement - si ce n’est pas le cas, il sera redémarré jusqu’à ce qu’il le fasse. Cela ne signifie jamais que le conteneur ne sera pas redémarré, 
+quelle que soit la raison pour laquelle il s’est quitté.
+
+--env -- > default
+amir@kubemaster:~/fpods$ kubectl run busybox --image=busybox --command --restart=Never -n my-project-dev
+
+compare:
+--------
+/fpods$ kubectl -n my-project-dev run busybox5 --image=busybox --restart=Never --dry-run=client --command -- env -o yaml > envpod.yaml
+/fpods$ kubectl -n my-project-dev run busybox --image=busybox --restart=Never --dry-run=client -o yaml --command -- env > envpod.yaml (bonnnnn)
+
+
+--dry-run :
+-----------
+ --dry-run=indicateur client pour prévisualiser l’objet qui serait envoyé à votre cluster, sans vraiment le soumettre
+client: elle ne crée pas la config or le pod
+server : pareils //
+none: elle crée le pod et la config

@@ -1,0 +1,246 @@
+
+
+email: nafiz.mia@realestate.bnpparibas
+------------------------------------------------------
+Bonjour M. Mia,
+Suite à notre échange de la dernière fois, on aimerait savoir plus sur le besoin sur quoi Nsssim est attendu,
+à fin de lui faire monter en compétence sur ses aspects, et bien l'orienté dans sa formation.
+exemple d'information: 
+
+Environnement de travail ?
+--------------------------
+Env de déploiement ( dev, prod, test)
+Les systèmes d'exploitation et des technologies complémentaires, tels que la sécurité réseau ...
+Est-ce que les déploiements se réalisent via des stacks devops (compris Git, Jenkins, Ansible,  provider privé)      
+Les tâches sont réalisées sur un env microsoft windows ou Linux ?
+Editeurs particuliers ?
+La nature d'hyperviseurs urilisée!
+ 
+par rapport à kubernetes:
+-------------------------
+La version de kub utilisée ?
+Comment vous gérez les exécuter vos conteneurs (via minikube, quelle version !) 
+Pour kub est-il installé en local ou sur le cloud?
+Possibilité d'avoir le document d'architecture du kubernetes ??
+Au niveau des outils de management utilisés comme Helm ?
+Utilisation de Kub est-il utilisé par des applications on-premise ou sur de cloud ?
+Pour le stockage des volumes, c'est en remote ou en local ?
+ 
+ 
+Application à migrer:
+---------------------l
+Compétences en matière de serveurs et de systèmes, notamment d'architectures et de matériel réseau ?
+La gestion de serveurs en clusters?
+Quel type d'application à migrer 
+La nature des serveurs déployés pour vos applis
+
+
+
+
+***************************************************************************************************************************************
+Est-ce que si une migration d'application sur le cloud ?
+Quel type d'application va être migré ?
+
+Est-e que vous avez déja une architecture Kubernetes déployée ?
+Besoin d'automatiser les processus de développement, de publication et d'exploitation ?
+À part kubernetes, sur quelles d'autres technologies est attendu ?
+*******************************************************************************************************************************************************************************
+
+11 ) Kubernete
+
+Replicat) : En tant que tel, il est souvent utilisé pour garantir la disponibilité d'un nombre spécifié de Pods identiques.
+L'objectif d'un ReplicaSet est de maintenir un ensemble stable de pods de réplica s'exécutant à tout moment
+
+Kebrnetes:
+c'est un orchestrateur de conteneur : cest qui veut sur il manage d'autre application 
+c'est une declarative paradigm, c'est a kuvernitise de converger les etat du conteneur comme souahiter, comme un thermosta 23 degree, 
+c'est standart dans  tout les provider comme gcp  aws 
+Architecture:
+l'administrateur : le user manage le logiciel kubctl pour envoyer des commander, requette a kebernetes sur le point controle
+le point control va donner les ordre au Noeud
+les utilisateur vont rentre par un LoadBalncer 
+
+
+
+Le control Plane:
+****************  se compose de ses logiciel avec une mascote :
+il sexecute dans un noued:
+
+kube api server: comme la passerelle pour controler votre cluster, tout les client ou application qui veulent parler avec kebernetes, toute les commandes passe par kube-api-server, c'est l'interface rest
+
+etcd  : il stoque les états, c'est la mémeoire de kubernetes, c'est une bdd orienté clé-valeur, qu'est 'distribué' qui pemret d'avoir un moyen de garantir que si un noued tombe down,
+    ses infos se retrouvent	dans etcd, que d'autre version de votre information soit persistante, il est concue pour être résilient aux pannes, implémente le consensuce c-à-d 
+    quand vous aller enregistrer une ifno sous etcd soit propager aux autres noeuds
+	Application Data is not store in 'etcd' , c'est stocker ailleurs 	
+
+kube-controlle-manager : c'est un thermosta, il sert à vérfier que l'état observer est à l'état désirée (c'est un contrôleur qui va inspecter instamment le cluster)
+                        il détecte le statu des changements des PODs sur les NODEs si y a des PODs qui sont  'DIE' , il va demander au 'scheduler' de couver et de re-créer les PODs
+						supprimer. le controler-manger prends conscience que il y a un PODs 'DIE' or changes , il regarde dans 'ETCD' pour confirmation
+
+cube-scheduler: c'est le logiciel agent logistique qui va essayer de répartir les conteneur d'une manière efficace, les ressource de votre 'working boot', 
+		si les worker/Node2 qst busy 65% de charge , il va creer un POD dans le Node1 (20 %busy) aulieu dans le NODE2,
+		le kublet va demander à DOKER de lexecuter sur le NODE1 (POD creer), et tout cela est enregister dans 'etcd' 
+jaimerai que par on a demander de tourner 3 POD et que c'est tache se deroule que sur ces 2 POD la:
+   
+
+Node
+****
+kublet: une sort d'agent qui sexecute un noeud, understand a yaml format, c'est un noued qui est reponsable de donnéer les ordre en provenance du cluster kebernetes vers les different autre composant dans le groupe, il comprrnede les ordre en yaml, il parle en permanace avec l'kube-api-server, exp kub-proxy
+
+un kubproxy : il sera le logiciel qui va gerer toute les regle reseau au sein de chaque noeud, aau sein de chaque noeud j'ai des contenairs , ils vont avoir une isolation reseau d'une vu reseau, 
+il va faire la plomberie  pour connecter tel contenaire a tel contenaire, pour lui donner une IP ( on utilise IPVS) 
+
+containeur runtime engine: c'est lui qui va faire tourner les contenur, exp de runtime qui eest fournie par doker, le container D qui va faire tourner les conteneur dans le NOEUD 
+
+ 
+
+USER
+****
+Les N user se connecte sur un  LoadBalancer qui va se connect au NOUED et kub-proxy, la partie qui va gerer l'aspect reseau, les N user vont venir avec une tel adresse IP, qui correspond a une tel IP 
+sur un POD  et le kublet c lui qui prends ses ordre en provenance de l'api-server et qui va donenr des ordres au runtime des container 
+
+LoadBalancer: va recevoir les requete des USER et va les forward vers le bon POD 
+
+
+Conecpt et ressource:
+*********************
+dans Kebernetes tout est API object, un object au sein d'un groupe, quest tres simple a utiliser et a etendre, 
+les API on a un different degree de maturite, tout sur kebernetes obeit a des API ( y a des api ALPHA et BETA limite stable, et Stable ne change pas )
+elle sont isolées des unes des autres no seulement leurs groupe exp:
+apis/apps/v1/deployment
+apis/batch/v1BETA/cronjobs
+
+cette object 
+************
+toute objet creer par des humains ou par des contolleur ils obeissent tous aux meme règle de version, il vivent dans un 'NAMESPACE' 
+on le voit comme un ordre, ils sont écrit de la meme maniere, on va lire en en YAML
+ 
+
+
+les Object Coeur
+****************
+PODS: c'est un partage de volume et de reseau et un contexte dou different conteneur s'interroge entre eux, vont partager la meme adresse ip et volume , soit il marche tous soit non
+Si ya un probeleme sur un POD kibernetes relance un nouveau POD
+KIND: POD
+metadaonne: 
+   name : pod
+spec 
+  container 
+  - name: nginx
+    port: 80
+volumeMounts
+
+
+NAMESpace
+**********
+NameSpace: comme un cluster vitual au sein de votre cluster, dans le quelle je peux mettre different objects avec different utilisateur et controle d'acces, et dcrire nos resource au seine du name space, c'est comme isoler un besoin d'un autre   
+il existe des namespace par defaut, public, 'KIND' c'est pour definir un type d'objet avec  Kind:Namespace 
+Kind: Namespace
+name: prod
+labels
+ app: MyBigWebApp  
+
+
+Labels:
+*******
+nimporte quelle object ou "cluster ou POD " peut contenaire des labes
+c'est des tag, clé-valeur
+pour avoir des selecteur :
+
+Selecteur:
+**********
+kebernetes il va pouvoir slectionner efficassement les ressources avec "Ces labes/tag", 
+et on peut aussi specfier des LABES pour "nodeSelector: gpu" pour dire voila je veux uniquement les pode qui contient ce LABEL et qui se retouve dans HOST 172.2.25.2 A
+ 
+POD peut creuver:
+*****************
+
+SERVICE
+*******
+IL joue le role du 'LoadBalancer' si un un pod sur un replicat est busy il envoie sur la copie R2 dans le second 'NODE'
+il nous permet d'avoir une selection sur les POD exp app=toto et env=prod
+il envoit du traffic sur ses POD la
+c'est maniere de y acceder au different POD
+Le "service" continue a vivre, et dans le "service" JE renseigne les labes des "nodeSlector" de chaque POD, comme ca il va achemnier du trafic vers ses POD 
+Service c'est un moyen d'achemenier du trafic vers vos POD
+
+
+DNS
+***
+il offre 
+un service name qui vit dans name space Keberntis peut lui offrir un DNS comme suit 
+prod.namespace.svc.cluster.local     cest un NOM DE DENS qui va se pointer sur se serive la  
+prod-ngind.namespace.svc.cluster.local
+
+Proxy qui gère la plombrie entre le "service" et le "POD"
+si un POD tome Down "KUBE-PROXY" se charge de faire la plomberie entre le Service et le POD
+
+
+Sclale DOWN eet SCALE UP
+************************
+faire grandir un service, 
+quand vous avez 3 "replicat/copie" du meme POD utiliser "replicatSet" objet qui va verifier si tout les 3 POD Copie tournent , replicatSet interroge Kebernetes pour demmarer si un est down 
+
+DEPLOIMENT
+**********
+il offre
+Pour passer d'une version V1.0.0 à une autre version V2.1.0 en creant un "replicaset R2"
+il permet de faire matcher une version d'un logiciel avec le "replicatset"
+il nous offre un rollback de R2 replicat to R1 replicat pour avoir un etat  Si on decide de supprimer les POD sur R1
+
+Horizontal AUTOSCALING
+**********************
+grandir et faire grandire lensemble de contenaire, par exp si il une charge de 90% sur un conteneur, creer des replicat, copies  
+
+
+14) Replicat
+********
+il permet de creer une copie du 'NODE1' vers le 'NODE2' et partage le meme 'SERVICE IP' et le meme volume pvc private volume claim
+
+15) pv et private volume claim
+c'est la on se spécifie les capacité du volume que on veut louer pour notre conteuneur/POD, puis lui il va aller selectionner dans les pv existant un pv qu'est a la tailler souhaiter
+pr exp on a pv=10Gi et pv=25, donc notre pvclaim=15Gi, donc il selectionne le pv=25G
+
+
+16) Type de stockage
+NFS server,  local Disk, cloud Stroage(AWS, S3 ....), on peut avoir 2 storages different exp NFS Server and CLoud Stroge, comme jsute unn seil
+
+
+17) NFS NetworkWork file Sharing 
+mount: /nfs/
+to share files and folder between Linux, developped by SUN, 
+Our lab Environement: 
+côte server :  hostname et ip adresse 192.168.10.169
+it enables the clients to access to NFS share folders/files
+rpcbind: the rpcbind server converts the RPC program numbers intouniversel address 
+/etc/fstab: to control the File system including NFS directories are mounted when the system boots.
+nfs-lock : implement nfs lock recovery when an NFS falls down, crashes ond reboots  
+cote client : hostname et ip address 193.168.10.170
+youtube: https://www.youtube.com/watch?v=MBqZe5d9BNQ
+
+
+18) perssitent Volume pv
+----don't must be in the same namesapca =! to pvc that must be int the same namepace the POD
+Kind: PersistentVolume
+metat-data
+sepc
+capacity storage : 10 Gi
+VolumeMode:
+acessMode: ReadWriteOnce: 	
+
+
+sur kubernetes:
+des connaissances sur les:
+kubctl 
+minikube start type de virtualiseation supporté
+namespace 
+serviceIP : pour acheminer le traifc entre les POD/contenur 
+Ingress  
+Ingress : path + host
+dns : namespace.svc......
+contenaires (blueprints mountvolume port )
+secret
+configMAp
+Noeud
+Volumes: persisten volume, persistant volumes claim (pvc) must be in the same namespace that the POD
+etcd:

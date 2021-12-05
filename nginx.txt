@@ -1,0 +1,164 @@
+nginx
+******
+
+
+--------------------------
+webapp + LB
+POD   TO DO https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/
+Les éléments d'un pod sont toujours co-localisés et co-ordonnancés, et s'exécutent dans un contexte partagé. 
+
+----------------------------
+jolie code github nginx + server + http : https://gist.github.com/petitviolet/d36f33d145d0bbf4b54eb187b79d0244
+-----------------------------------
+
+---------
+Getting Started with the Nginx Configuration File ( nginx ssl tls listen 443)
+https://www.youtube.com/watch?v=NEf3CFjN0Dg
+------------------
+site officile de nginx 			
+**************************************************
+https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/
+**************************************************
+
+----------------------------------------------------------------
+une belle explication simple de nginx et conf  + server + location nginx:
+https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/   https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+nginx    https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+nginx modele video https://www.youtube.com/watch?v=qxPdd-geqqA
+
+https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+---------------------------------------------------------------
+
+create a simple file index.html + nginx + docker 
+https://www.youtube.com/watch?v=mgwo8fq-SkA	
+
+---------------------------------------------------------------
+Add simple file repositoey to html ( docker )
+    3  mkdir nginx_file
+    6  cd nginx_file/
+    9  vim index.html
+   10  ls
+   11  docker run -d -p 8000:80 -v ~/nginx_file:/usr/share/nginx/html --name container_ng nginx
+   12  docker ps -- > 4aaa ........
+   15  docker exec -it 4aaa /bin/bash
+   16  ls
+   17 index.html + about.html
+   Fin
+   ***
+   curl localhost:8000  et non pas 80 (faut renseigne rle 8000)
+   
+--------------------------------------------------------------------------------------
+
+Commençons par un exemple. Voici un extrait de fichier de Dockerfile qui comporte à la fois un ENTRYPOINT et un CMD, tous deux spécifiés en tant que liste (array):
+ENTRYPOINT ["/bin/chamber", "exec", "production", "--"]
+CMD ["/bin/service", "-d"]
+
+En réunissant les commandes, les arguments par défaut du conteneur seront ["/bin/chamber","exec", "production", "--","/bin/service", "-d"].
+
+--------------------------------------------------------------------------------------
+Default nginx.conf:
+*******************
+root@356c9b5db9da:/etc/nginx/conf.d# ls
+default.conf
+root@356c9b5db9da:/etc/nginx/conf.d# cat default.conf 
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    #access_log  /var/log/nginx/host.access.log  main;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+    #
+    #location ~ \.php$ {
+    #    proxy_pass   http://127.0.0.1;
+    #}
+
+    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+    #
+    #location ~ \.php$ {
+    #    root           html;
+    #    fastcgi_pass   127.0.0.1:9000;
+    #    fastcgi_index  index.php;
+    #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+    #    include        fastcgi_params;
+    #}
+
+    # deny access to .htaccess files, if Apache's document root
+    # concurs with nginx's one
+    #
+    #location ~ /\.ht {
+    #    deny  all;
+    #}
+}
+VS
+**
+http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        sendfile        on;
+        keepalive_timeout  65;
+
+        upstream webapp {
+            server 127.0.0.1:5000;
+        }
+
+        server {
+            listen 80;
+
+            location / {
+                proxy_pass         http://webapp;    #Les documents proxy_pass disent: Cette directive définit l’adresse du serveur proxy et l’URI auquel 
+											       l’emplacement sera mappé. Donc, lorsque vous dites à Nginx de proxy_pass , vous dites « Transmettez cette demande à cette URL proxy 
+                proxy_redirect     off;
+            }
+        }
+    }
+------------------------------------------------------------------
+serveur proxy:
+**************
+Pourquoi utiliser le proxy inverse NGINX ?
+Sécurité accrue: Un proxy inverse Nginx agit également comme une ligne de défense pour vos serveurs backend. La configuration d’un proxy inverse garantit que l’identité de vos serveurs principaux reste inconnue
+
+-----------------------------------------------------------------
+https://kubernetes.github.io/ingress-nginx/troubleshooting/  link
+---------------------------------------------------------------
+Obtain the Docker Container Running nginx
+	$ docker ps | grep nginx-ingress-controller
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+d9e1d243156a        quay.io/kubernetes-ingress-controller/nginx-ingress-controller   "/usr/bin/dumb-init …"   19 minutes ago      Up 19 minutes                                                                            k8s_nginx-ingress-controller_nginx-ingress-controller-67956bf89d-mqxzt_kube-system_079f31ec-aa37-11e8-ad39-080027a227db_0
+
+-------------------------------
+
+
+    Make sure nginx is running in --with-debug
+$ nginx -V 2>&1 | grep -- '--with-debug'
+
+-----------------------------
+
+serveur en amont
+****************
+ce ,sont les upstream
+upstream big_server_com {
+    server 127.0.0.3:8000 weight=5;
+    server 192.168.0.1:8001;
+  }
+  -------------------------------
+  
+ proxy_pass:
+ ************
+ tout request en direction d enginx par exemple sur le port 80, elle se mapper vers les serveur en aont ( les upstream)

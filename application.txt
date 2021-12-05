@@ -1,0 +1,26 @@
+
+
+deployer une application:
+https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+
+
+
+Deploiment application  : https://www.youtube.com/watch?v=gVjLDwcA6sQ
+lien github: https://github.com/yankils/Simple-DevOps-Project
+
+déployer une application 3 tiers:
+**********************************
+faut voir: 
+- Domaine Name -----> Route 53 
+- DNS settings  -----> Route 53 + LB
+- Business logic -----> EC SQS
+- Front-End -------> EC2
+- Allied Service -----> SNS SES IAM
+- Data Model
+- Content Storage ------> S3 , ebs volume 
+- Content delivery netwwork ------> Cloudfront
+- Allied service ( Security, cummunication )
+- Hig availability ( Autoscaling group, ELB, Route53)
+- Load Balancing
+- Routing Policy 
+- Monitoring ------> clous trauls et cloud watch 

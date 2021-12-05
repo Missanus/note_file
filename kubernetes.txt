@@ -1,0 +1,56 @@
+kubernetes:
+
+Context et set-context
+https://kubernetes.io/fr/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+
+installtion kuberntes :
+ https://kurtzemann.fr/tags/kubeadm/
+https://kurtzemann.fr/2021/02/kubernetes-jadministre-mon-cluster-2-mise-en-place-du-plugin-cni/
+cilium or calico -- >> $ kubectl exec cilium-cc8zz -n kube-system -- cilium node list
+
+
+
+ etcd backup sauvegarde et restore : 
+ https://docplayer.fr/202744406-Sauvegarder-et-restaurer-votre-cluster-kubernetes.html
+ https://docplayer.fr/202744406-Sauvegarder-et-restaurer-votre-cluster-kubernetes.html
+ou
+https://ichi.pro/fr/sauvegarde-et-restauration-du-cluster-kubernetes-a-l-aide-de-l-outil-etcdctl-58837143038846
+
+
+Kubernetes coordinates a highly available cluster of computers that are connected to work as a single unit.
+Kubernetes automates the distribution and scheduling of application containers across a cluster in a more efficient way. Kubernetes is an open-source platform and is production-ready.
+
+A Kubernetes cluster consists of two types of resources:
+
+    The Control Plane coordinates the cluster
+    Nodes are the workers that run applications
+
+backup et restaure etc:
+-----------------------
+    kubectl describe pod etcd-master -n kube-system | grep data-dir --data-dir=/var/lib/etcd
+snap: et : db :  root@kubemaster:/var/lib/etcd/member/snap# ls -la
+
+
+Solution: Fix the Error – The connection to the server localhost:8080 was refused
+export config.adm  :  https://k21academy.com/docker-kubernetes/the-connection-to-the-server-localhost8080-was-refused/
+
+--restart=Never :
+And by setting the flag --restart=Never we tell Kubernetes to create a single pod rather than a Deployment. Once you hit enter, the pod will be created.
+
+root@kubemaster:/home/vagrant/.kube# kubectl create namespace nassim-ns
+namespace/nassim-ns created
+root@kubemaster:/home/vagrant/.kube# kubectl run nginxpod pod --image=nginx --restart=Never --namespace=nassim-ns
+pod/nginxpod created
+
+before:
+---------
+root@kubemaster:/var/lib/etcd/member/snap# ls -la
+total 4832
+-rw-r--r-- 1 root root    7872 Dec  4 22:35 0000000000000004-0000000000002711.snap
+-rw------- 1 root root 4927488 Dec  4 22:53 db
+
+after : 
+-------creating ns et pod
+total 4824
+-rw-r--r-- 1 root root    7872 Dec  4 22:35 0000000000000004-0000000000002711.snap
+-rw------- 1 root root 4927488 Dec  4 23:11 db

@@ -1,0 +1,17 @@
+certificat
+
+
+
+openssl certifiact inde docker 
+https://github.com/nginxinc/docker-nginx/blob/master/Dockerfile-alpine.template
+
+
+apiVersion: "v1"
+kind: "Secret"
+metadata:
+  name: "nginxsecret"
+  namespace: "default"
+type: kubernetes.io/tls
+data:
+  tls.crt: "LS0tLS1CRUdJT0F3RUFBYU5RTUU0d0hRWURWUjBPQkJZRUZPNG9OWkI3YXc1OUl"
+  tls.key:"FERGTRHTRJHJHLHST0HLTHRTHUdHJTTHFTR3RUFBYU5RTUU0d0hRWURWUjBPQkJZRUZPNFFFRESZERFGBJG9OWkI3YXc1OUl
